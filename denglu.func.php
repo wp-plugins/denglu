@@ -660,12 +660,12 @@ if (!function_exists('dcToLocal')) {
 		global $wptm_comment;
 		$denglu_last_id = get_option('denglu_last_id'); //读取数据库
 		$denglu_commentState = get_option('denglu_commentState'); //读取数据库 
-		//if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > 300) { // 5min
+		if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > 300) { // 5min
 			save_dcToLocal($denglu_last_id); // 同步评论到本地服务器
 			save_dcStateToLocal($denglu_commentState, $denglu_last_id['time']); // 同步评论状态到本地服务器
 			delete_same_comments(); // 删除相同评论
 		    denglu_importReplyComment(); // 从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器
-		//} 
+		} 
 	} 
 	if (default_values('dcToLocal', 1, $wptm_comment)) {
 		add_action('init', 'dcToLocal');
