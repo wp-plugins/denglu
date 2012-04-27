@@ -21,9 +21,9 @@ if (!class_exists('WP_Connect_Comment_Widget')) {
 			if ($title)
 				echo $before_title . $title . $after_title;
 			if ($_COOKIE["denglu_recent_comments"]) {
-				$comments = array_slice(json_decode(stripslashes($_COOKIE["denglu_recent_comments"]), true), 0, $number , true);
+				$comments = php_array_slice(json_decode(stripslashes($_COOKIE["denglu_recent_comments"]), true), 0, $number , true);
 		    } elseif (is_array($_SESSION['denglu_recent_comments'])) {
-				$comments = array_slice($_SESSION['denglu_recent_comments'], 0, $number , true);
+				$comments = php_array_slice($_SESSION['denglu_recent_comments'], 0, $number , true);
 			} else { // V2.3
 				$recentComments = get_denglu_recent_comments($number);
 				$comments = $recentComments['comments'];

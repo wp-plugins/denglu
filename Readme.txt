@@ -4,13 +4,13 @@ Donate link: http://www.denglu.cc/source/denglu-comments.html
 Tags: 灯鹭,社会化评论,Denglu,Denglu评论,评论,Denglu Comment,disqus,pinglunla,uyan,youyan,duoshuo,widget,sina,tencent,qq,qzone,Share
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 1.5
+Stable tag: 1.6
 
 灯鹭社会化评论产品。
 
 == Description ==
 
-[演示页面](http://www.denglu.cc/demo.html) 
+[产品首页](http://www.denglu.cc/comment.html) 
 
 [帮助中心](http://bbs.denglu.cc/forum-27-1.html) 
 
@@ -24,9 +24,11 @@ Stable tag: 1.5
 
 3、评论支持SE0。
 
-4、支持网站原有评论导入到灯鹭云端服务器，并在社会化评论框显示。从灯鹭服务器导到本地的评论被回复了，可以再把这条回复导入到灯鹭服务器。
+4、支持网站原有评论导入到灯鹭云端服务器，并在社会化评论框显示。
 
 5、支持调用最新评论（小工具）
+
+6、从新浪微博抓取回来的评论同步到本地时，评论者可以使用新浪微博头像。点击头像链接还能进入TA的微博主页。
 
 = 产品介绍 =
 
@@ -53,6 +55,12 @@ Stable tag: 1.5
 1. 登录社会化评论 后台界面
 
 == Changelog ==
+
+= 1.6.0 =
+
+新增：从新浪微博抓取回来的评论同步到本地时，评论者可以使用新浪微博头像。点击头像链接还能进入TA的微博主页。
+
+优化部分代码
 
 = 1.5.0 =
 

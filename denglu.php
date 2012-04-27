@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭网开发的社会化评论 —— Denglu评论 ( <a href="http://www.denglu.cc/" target="_blank">灯鹭网</a> 版权所有。)
-Version: 1.5
+Version: 1.6
 */
 
 $wptm_basic = get_option('wptm_basic');

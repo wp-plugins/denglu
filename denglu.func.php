@@ -57,15 +57,127 @@ if (!function_exists('class_http')) {
 		return $response['body'];
 	} 
 } 
+if (!function_exists('ifabc')) {
+	function ifab($a, $b) {
+		return $a ? $a : $b;
+	} 
+	function ifb($a, $b) {
+		return $a ? $b : '';
+	} 
+	function ifac($a, $b, $c) {
+		return $a ? $a : ($b ? $c : '');
+	} 
+	function ifabc($a, $b, $c) {
+		return $a ? $a : ($b ? $b : $c);
+	} 
+	function ifold($str, $old, $new) { // 以旧换新
+		return (empty($str) || $str == $old) ? $new : $str;
+	}
+} 
+// 根据键名、键值对比,得到数组的差集 array_diff_assoc  < 4.3.0
+if (!function_exists('array_diff_assoc')) {
+	function array_diff_assoc($a1, $a2) {
+		foreach($a1 as $key => $value) {
+			if (isset($a2[$key])) {
+				if ((string) $value !== (string) $a2[$key]) {
+					$r[$key] = $value;
+				} 
+			} else {
+				$r[$key] = $value;
+			} 
+		} 
+		return $r;
+	} 
+} 
+// 从数组中取出一段，保留键值 array_slice  < 5.0.2
+if (!function_exists('php_array_slice')) {
+	function php_array_slice($array, $offset, $length = null, $preserve_keys = false) {
+		if (!$preserve_keys || version_compare(PHP_VERSION, '5.0.1', '>')) {
+			return array_slice($array, $offset, $length, $preserve_keys);
+		} 
+		if (!is_array($array)) {
+			user_error('The first argument should be an array', E_USER_WARNING);
+			return;
+		} 
+		$keys = array_slice(array_keys($array), $offset, $length);
+		$ret = array();
+		foreach ($keys as $key) {
+			$ret[$key] = $array[$key];
+		} 
+		return $ret;
+	} 
+}
+
+/**
+ * WordPress连接微博 自定义函数
+ */ 
+// 匹配视频,图片
+if (!function_exists('preg_match_media_url')) {
+	function preg_match_media_url($content, $post_ID = '') {
+		preg_match_all('/<embed[^>]+src=[\"\']{1}(([^\"\'\s]+)\.swf)[\"\']{1}[^>]+>/isU', $content, $video);
+		preg_match_all('/<img[^>]+src=[\'"]([^\'"]+)[\'"].*>/isU', $content, $image);
+		$v_sum = count($video[1]);
+		if ($v_sum > 0) {
+			$v = $video[1][0];
+		} 
+		$p_sum = count($image[1]);
+		if ($p_sum > 0) {
+			$p = $image[1][0];
+		} elseif (is_numeric($post_ID) && function_exists('has_post_thumbnail') && has_post_thumbnail($post_ID)) { // 特色图像 WordPress v2.9.0
+			$image_url = wp_get_attachment_image_src(get_post_thumbnail_id($post_ID), 'full');
+			$p = $image_url[0];
+		} 
+		if ($p || $v)
+			return array($p, $v);
+	} 
+}
+// 保存wp_comments表某个字段
 if (!function_exists('wp_update_comment_key')) {
-	function wp_update_comment_key($comment_ID, $comment_key, $vaule) { // 保存wp_comments表某个字段
+	function wp_update_comment_key($comment_ID, $comment_key, $vaule) {
 		global $wpdb;
 		$$comment_key = $vaule;
 		$result = $wpdb -> update($wpdb -> comments, compact($comment_key), compact('comment_ID'));
 		return $result;
 	} 
 } 
-
+// 判断是否启用了某个插件
+if (!function_exists('is_plugin_activate')) {
+	function is_plugin_activate($plugin) {
+		if (in_array($plugin, (array) get_option('active_plugins', array()))) {
+			return true;
+		} elseif (is_multisite()) {
+			$plugins = get_site_option('active_sitewide_plugins');
+			if (isset($plugins[$plugin]))
+				return true;
+		} 
+		return false;
+	} 
+}
+// 判断是否安装了 WordPress连接微博 V1
+function wp_connect_v1() {
+	if (is_plugin_activate('wp-connect/wp-connect.php')) {
+		$wptm_version = get_option('wptm_version');
+		if ($wptm_version && version_compare($wptm_version, '2.0', '<')) {
+			return true;
+		} 
+	} 
+}
+// 显示新浪微博用户头像
+add_filter("get_avatar", "denglu_avatar", 10, 3);
+function denglu_avatar($avatar, $id_or_email = '', $size = '32') {
+	global $comment;
+	if (is_object($comment)) {
+		$uid = $comment -> user_id;
+		$email = $comment -> comment_author_email;
+		$author_url = $comment -> comment_author_url;
+		if ($author_url && strpos($author_url, 'http://weibo.com/') === 0) {
+			$weibo_uid = ltrim($author_url, 'http://weibo.com/');
+			$out = 'http://tp' . rand(1, 4) . '.sinaimg.cn/' . $weibo_uid . '/50/0/1';
+			$avatar = "<a href='{$author_url}' target='_blank'><img alt='' src='{$out}' class='avatar avatar-{$size}' height='{$size}' width='{$size}' /></a>";
+		} 
+	} 
+	return $avatar;
+}
 /**
  * 评论函数 v2.3
  */
@@ -291,59 +403,6 @@ if (!function_exists('denglu_importComment')) {
 } 
 
 /**
- * WordPress连接微博 自定义函数
- */
-if (!function_exists('ifabc')) {
-	function ifab($a, $b) {
-		return $a ? $a : $b;
-	} 
-	function ifb($a, $b) {
-		return $a ? $b : '';
-	} 
-	function ifac($a, $b, $c) {
-		return $a ? $a : ($b ? $c : '');
-	} 
-	function ifabc($a, $b, $c) {
-		return $a ? $a : ($b ? $b : $c);
-	} 
-} 
-// 根据键名、键值对比,得到数组的差集 array_diff_assoc  < 4.3.0
-if (!function_exists('array_diff_assoc')) {
-	function array_diff_assoc($a1, $a2) {
-		foreach($a1 as $key => $value) {
-			if (isset($a2[$key])) {
-				if ((string) $value !== (string) $a2[$key]) {
-					$r[$key] = $value;
-				} 
-			} else {
-				$r[$key] = $value;
-			} 
-		} 
-		return $r;
-	} 
-} 
-// 匹配视频,图片
-if (!function_exists('preg_match_media_url')) {
-	function preg_match_media_url($content, $post_ID = '') {
-		preg_match_all('/<embed[^>]+src=[\"\']{1}(([^\"\'\s]+)\.swf)[\"\']{1}[^>]+>/isU', $content, $video);
-		preg_match_all('/<img[^>]+src=[\'"]([^\'"]+)[\'"].*>/isU', $content, $image);
-		$v_sum = count($video[1]);
-		if ($v_sum > 0) {
-			$v = $video[1][0];
-		} 
-		$p_sum = count($image[1]);
-		if ($p_sum > 0) {
-			$p = $image[1][0];
-		} elseif (is_numeric($post_ID) && function_exists('has_post_thumbnail') && has_post_thumbnail($post_ID)) { // 特色图像 WordPress v2.9.0
-			$image_url = wp_get_attachment_image_src(get_post_thumbnail_id($post_ID), 'full');
-			$p = $image_url[0];
-		} 
-		if ($p || $v)
-			return array($p, $v);
-	} 
-}
-
-/**
  * 最新评论 v2.3
  */
 if (!function_exists('denglu_recent_comments')) {
@@ -411,7 +470,7 @@ if (!function_exists('denglu_recent_comments')) {
  * 1.评论保存到本地服务器
  * 2.评论状态同步到本地服务器。
  * 3.从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器 V2.3.3
- * add_V2.3, edit_V2.3.3
+ * add_V2.3, edit_V2.3.4
  */
 if (!function_exists('dcToLocal')) {
 	function get_weiboInfo($name) {
@@ -463,16 +522,9 @@ if (!function_exists('dcToLocal')) {
 		global $wpdb;
 		return $wpdb -> get_var("SELECT comment_ID FROM $wpdb->comments WHERE comment_agent = 'Denglu_{$cid}' LIMIT 1");
 	} 
-	// 判断是否安装了 WordPress连接微博 V1
-	function wp_connect_v1() {
-		if (defined('WP_CONNECT_VERSION') && version_compare(WP_CONNECT_VERSION, '2.0', '<')) {
-			return true;
-		} 
-	} 
-	$wp_connect_v1 = wp_connect_v1(); 
 	// 保存单条评论
 	function save_dengluComment($comment, $parent = 0) {
-		global $wpdb, $wp_connect_v1;
+		global $wpdb;
 		if ($commentID = $comment['sourceID']) // 以前导入到灯鹭服务器记录的本地评论ID
 			return $commentID;
 		$cid = $comment['cid'];
@@ -486,7 +538,7 @@ if (!function_exists('dcToLocal')) {
 				$weibo_uid = str_replace($weiboinfo[3], '', $comment['url']);
 			} 
 			$email = ($weiboinfo[2]) ? $weibo_uid . $weiboinfo[2] : $comment['uid'] . '@denglu.cc';
-			$user_id = ($wp_connect_v1) ? get_user_by_meta_value($id, $weibo_uid) : '';
+			$user_id = (wp_connect_v1()) ? get_user_by_meta_value($id, $weibo_uid) : '';
 		} else {
 			$email = $comment['email'];
 		} 
@@ -665,15 +717,17 @@ if (!function_exists('dcToLocal')) {
 	} 
 	// 触发动作
 	function dcToLocal() {
-		global $wptm_comment;
-		$denglu_last_id = get_option('denglu_last_id'); //读取数据库
-		$denglu_commentState = get_option('denglu_commentState'); //读取数据库 
-		if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > 300) { // 5min
-			save_dcToLocal($denglu_last_id); // 同步评论到本地服务器
-			save_dcStateToLocal($denglu_commentState, $denglu_last_id['time']); // 同步评论状态到本地服务器
-			delete_same_comments(); // 删除相同评论
-		    denglu_importReplyComment(); // 从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器
-		} 
+		if (!isset($_POST['post_ID'])) { // 发布文章时不触发
+			global $wptm_comment;
+			$denglu_last_id = get_option('denglu_last_id'); //读取数据库
+			$denglu_commentState = get_option('denglu_commentState'); //读取数据库
+			if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > 300) { // 5min
+				save_dcToLocal($denglu_last_id); // 同步评论到本地服务器
+				save_dcStateToLocal($denglu_commentState, $denglu_last_id['time']); // 同步评论状态到本地服务器
+				delete_same_comments(); // 删除相同评论
+				denglu_importReplyComment(); // 从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器
+			} 
+		}
 	} 
 	if (default_values('dcToLocal', 1, $wptm_comment)) {
 		add_action('init', 'dcToLocal');
