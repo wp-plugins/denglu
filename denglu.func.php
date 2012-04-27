@@ -57,6 +57,14 @@ if (!function_exists('class_http')) {
 		return $response['body'];
 	} 
 } 
+if (!function_exists('wp_update_comment_key')) {
+	function wp_update_comment_key($comment_ID, $comment_key, $vaule) { // 保存wp_comments表某个字段
+		global $wpdb;
+		$$comment_key = $vaule;
+		$result = $wpdb -> update($wpdb -> comments, compact($comment_key), compact('comment_ID'));
+		return $result;
+	} 
+} 
 
 /**
  * 评论函数 v2.3
