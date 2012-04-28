@@ -10,7 +10,7 @@ Stable tag: 1.6
 
 == Description ==
 
-[产品首页](http://www.denglu.cc/comment.html) 
+[产品首页](http://www.denglu.cc/source/denglu-comments.html) 
 
 [帮助中心](http://bbs.denglu.cc/forum-27-1.html) 
 
