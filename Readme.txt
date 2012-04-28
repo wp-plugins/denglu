@@ -10,11 +10,11 @@ Stable tag: 1.6
 
 == Description ==
 
-= 技术支持 =
-
->客服QQ: 2499106838、1130488327、1390654016 ;QQ交流群: 77434617 ;联系电话：15110089672 ;新浪微博：[ @水脉烟香](http://weibo.com/smyx) 、[ @灯鹭](http://weibo.com/idenglu) 
-
->技术论坛：http://bbs.denglu.cc/forum-27-1.html 官方网站：http://www.denglu.cc
+>**技术支持**.
+>客服QQ: 2499106838、1130488327、1390654016
+>QQ交流群: 77434617 ;联系电话：15110089672
+>新浪微博：[ @水脉烟香](http://weibo.com/smyx) 、[ @灯鹭](http://weibo.com/idenglu) 
+>技术论坛：[ http://bbs.denglu.cc/forum-27-1.html ](http://bbs.denglu.cc/forum-27-1.html) 官方网站：[ http://www.denglu.cc ](http://www.denglu.cc)
 
 [WordPress连接微博](http://wordpress.org/extend/plugins/wp-connect/) —— 集成了Denglu评论（还包括同步文章到微博、合作网站帐号登录WordPress等实用功能）
 
