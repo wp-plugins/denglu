@@ -4,7 +4,7 @@ Plugin Name: Denglu评论
 Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
-Description: 灯鹭网开发的社会化评论 —— Denglu评论 ( <a href="http://www.denglu.cc/" target="_blank">灯鹭网</a> 版权所有。)
+Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 Version: 1.6
 */
 
