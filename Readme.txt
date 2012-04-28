@@ -6,7 +6,7 @@ Requires at least: 3.0
 Tested up to: 3.3.2
 Stable tag: 1.6
 
-灯鹭社会化评论产品。
+灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 
 == Description ==
 
