@@ -4,7 +4,7 @@ Donate link: http://www.denglu.cc/source/denglu-comments.html
 Tags: 灯鹭,社会化评论,Denglu,Denglu评论,评论,Denglu Comment,disqus,pinglunla,uyan,youyan,duoshuo,widget,sina,tencent,qq,qzone,Share
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 
 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 
