@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.6
+Version: 1.6.1
 */
 
 $wptm_basic = get_option('wptm_basic');
@@ -44,7 +44,9 @@ if (!function_exists('denglu_comments') && $wptm_comment['enable_comment'] && $w
 	add_filter('comments_template', 'denglu_comments');
 	function denglu_comments($file) {
 		global $post;
-		return dirname(__FILE__) . '/comments.php';
+		if (comments_open()) {
+			return dirname(__FILE__) . '/comments.php';
+		} 
 	} 
 }
 
@@ -53,7 +55,7 @@ function denglu_comments_do_page() {
 	if (isset($_POST['basic_options'])) {
 		update_option("wptm_basic", array('appid'=>trim($_POST['appid']), 'appkey'=>trim($_POST['appkey'])));
 	} elseif (isset($_POST['comment_options'])) {
-		update_option("wptm_comment", array('enable_comment' => trim($_POST['enable_comment']), 'manual' => trim($_POST['manual']), 'comments_open' => trim($_POST['comments_open']), 'dcToLocal' => trim($_POST['dcToLocal']), 'latest_comments' => trim($_POST['latest_comments']), 'enable_seo' => trim($_POST['enable_seo'])));
+		update_option("wptm_comment", array('enable_comment' => trim($_POST['enable_comment']), 'manual' => trim($_POST['manual']), 'comments_open' => trim($_POST['comments_open']), 'dcToLocal' => trim($_POST['dcToLocal']), 'time' => trim($_POST['time']), 'latest_comments' => trim($_POST['latest_comments']), 'enable_seo' => trim($_POST['enable_seo'])));
 	} elseif (isset($_POST['comment_delete'])) {
 		delete_option("wptm_basic");
 		delete_option("wptm_comment");
@@ -106,7 +108,7 @@ function denglu_comments_do_page() {
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">同步评论到本地</td>
-			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> />灯鹭评论内容保存一份在WordPress本地评论数据库（非实时同步，5分钟一次）</label></td>
+			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> />灯鹭评论内容保存一份在WordPress本地评论数据库</label> <label>(每 <input name="time" type="text" size="1" maxlength="3" value="<?php echo ($wptm_comment['time']) ? $wptm_comment['time'] : '5'; ?>" onkeyup="value=value.replace(/[^0-9]/g,'')" /> 分钟更新一次)</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">最新评论</td>

@@ -4,7 +4,7 @@ Donate link: http://www.denglu.cc/source/denglu-comments.html
 Tags: 灯鹭,社会化评论,Denglu,Denglu评论,评论,Denglu Comment,disqus,pinglunla,uyan,youyan,duoshuo,widget,sina,tencent,qq,qzone,Share
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 1.6
+Stable tag: 1.6.1
 
 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 
@@ -18,9 +18,9 @@ Stable tag: 1.6
 
 2、同步评论到微博/SNS。 （同步到新浪微博、腾讯微博、QQ空间、网易微博、搜狐微博、人人网，天涯微博、MSN ）
 
-3、评论数据会保存一份在WordPress本地数据库，不必担心评论丢失。（非实时同步，5分钟一次）
+3、评论数据会保存一份在WordPress本地数据库，不必担心评论丢失。
 
-4、灯鹭控制台"评论管理"页面的评论状态（待审核、垃圾评论、回收站、永久删除）也会同步到本地数据库。（非实时同步，5分钟一次）
+4、灯鹭控制台"评论管理"页面的评论状态（待审核、垃圾评论、回收站、永久删除）也会同步到本地数据库。
 
 5、评论支持SE0。
 
@@ -50,7 +50,7 @@ Stable tag: 1.6
 
 >新浪微博：[ @水脉烟香](http://weibo.com/smyx) 、[ @灯鹭](http://weibo.com/idenglu) 
 
->技术论坛：[http://bbs.denglu.cc/forum-27-1.html ](http://bbs.denglu.cc/forum-27-1.html) 官方网站：[http://www.denglu.cc ](http://www.denglu.cc)
+>技术论坛：[ http://bbs.denglu.cc/forum-27-1.html ](http://bbs.denglu.cc/forum-27-1.html) 官方网站：[ http://www.denglu.cc ](http://www.denglu.cc)
 
 == Installation ==
 
@@ -66,6 +66,14 @@ Stable tag: 1.6
 
 == Changelog ==
 
+= 1.6.1 =
+
+新增：灯鹭评论内容保存一份在WordPress本地评论数据库，新增更新时间控制，最少1分钟。（评论设置）
+
+修改：继承WordPress已有的评论开关，即当某篇文章关闭评论时，也不使用社会化评论功能，但是会显示以前的评论。
+
+修正：网站原有评论导入到灯鹭评论框时会出现的bug。
+
 = 1.6.0 =
 
 新增：从新浪微博抓取回来的评论同步到本地时，评论者可以使用新浪微博头像。点击头像链接还能进入TA的微博主页。
@@ -79,9 +87,9 @@ Stable tag: 1.6
 = 1.4.0 =
 *2012/04/09
 
-新增：评论数据会保存一份在WordPress本地数据库，不必担心评论丢失。（非实时同步，5分钟一次）
+新增：评论数据会保存一份在WordPress本地数据库，不必担心评论丢失。
 
-新增：灯鹭控制台"评论管理"页面的评论状态（待审核、垃圾评论、回收站、永久删除）也会同步到本地数据库。（非实时同步，5分钟一次）
+新增：灯鹭控制台"评论管理"页面的评论状态（待审核、垃圾评论、回收站、永久删除）也会同步到本地数据库。
 
 新增：评论支持SE0。
 

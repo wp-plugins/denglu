@@ -178,18 +178,24 @@ function denglu_avatar($avatar, $id_or_email = '', $size = '32') {
 	} 
 	return $avatar;
 }
+
 /**
- * 评论函数 v2.3
+ * 评论函数 v2.3.5
  */
 if (!function_exists('dengluComments')) {
+	function dlComments_open($open, $post_id = null) {
+		global $wptm_comment;
+		if (empty($wptm_comment['comments_open']) || (!empty($wptm_comment['comments_open']) && $open)) {
+			return true;
+		} 
+		return false;
+	}
+	add_filter('comments_open', 'dlComments_open', 10, 2);
 	function dengluComments() {
 		global $post;
-	    $_SESSION['wp_url_bind'] = '';
-	    $_SESSION['wp_url_back'] = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	    $wptm_basic = get_option('wptm_basic');
-	    $wptm_comment = get_option('wptm_comment');
-	    if (empty($wptm_comment['comments_open']) || (!empty($wptm_comment['comments_open']) && comments_open())) {
-			$wptm_connect = get_option('wptm_connect');
+		if (comments_open()) {
+	        $wptm_basic = get_option('wptm_basic');
+	        $wptm_comment = get_option('wptm_comment');
 			if (is_object($post)) {
 				$media_url = wp_multi_media_url($post -> post_content, $post -> ID);
 			} 
@@ -203,17 +209,12 @@ if (!function_exists('dengluComments')) {
 	if ($media_url) { // 是否有视频、图片
     echo "param.image = \"" . $media_url[0] ."\";\n"; // 需要同步的图片地址
     echo "param.video = \"" . $media_url[1] ."\";\n"; // 需要同步的视频地址，支持土豆优酷等
-    }
-	if ($wptm_connect['enable_connect']) { // 是否开启了社会化登录
-	echo (!is_user_logged_in()) ? "param.login = false;\n":"param.login = true;\n"; // 是否已经登录
-	echo "param.exit = \"".urlencode(wp_logout_url(get_permalink()))."\";\n"; // 退出链接
 }?>
     _dl_comment_widget.show(param);
 </script>
 <?php
-	} 
-	// 搜索引擎爬虫
-		if ($wptm_comment['enable_seo'] && preg_match("/(Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla)/i", $_SERVER['HTTP_USER_AGENT']) && have_comments()) { ?>
+// 搜索引擎爬虫
+if ($wptm_comment['enable_seo'] && preg_match("/(Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla)/i", $_SERVER['HTTP_USER_AGENT']) && have_comments()) { ?>
 <div id="dengluComments">
 	<h3 id="comments"><?php	printf( '《%2$s》有 %1$s 条评论', number_format_i18n( get_comments_number() ), '<em>' . get_the_title() . '</em>' );?></h3>
 	<div class="navigation">
@@ -231,7 +232,7 @@ if (!function_exists('dengluComments')) {
 <script type="text/javascript">
     document.getElementById('dengluComments').style.display="none";
 </script>
-<?php }}}
+<?php }}}}
 
 /**
  * 评论导入 v2.1.2
@@ -366,7 +367,7 @@ if (!function_exists('denglu_importComment')) {
 		global $wpdb;
 		$comments = $wpdb -> get_row("SELECT comment_agent FROM $wpdb->comments WHERE comment_ID = {$comment_ID} AND comment_agent not like '%Denglu%'", ARRAY_A);
 		if ($comments) {
-			return wp_update_comment_key($comment_ID, 'comment_agent', trim($comments['comment_agent'] . ' Denglu_' . $cid));
+			return wp_update_comment_key($comment_ID, 'comment_agent', trim(substr($comments['comment_agent'], 0, 200) . ' Denglu_' . $cid));
 		}
 	}
 	// 导入评论
@@ -719,9 +720,12 @@ if (!function_exists('dcToLocal')) {
 	function dcToLocal() {
 		if (!isset($_POST['post_ID'])) { // 发布文章时不触发
 			global $wptm_comment;
+			if (!$wptm_comment)
+				$wptm_comment = get_option('wptm_comment');
+			$time = ($wptm_comment['time'] > 0) ? $wptm_comment['time'] * 60 : 300; // 5min
 			$denglu_last_id = get_option('denglu_last_id'); //读取数据库
 			$denglu_commentState = get_option('denglu_commentState'); //读取数据库
-			if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > 300) { // 5min
+			if (!$denglu_last_id['time'] || time() - $denglu_last_id['time'] > $time) {
 				save_dcToLocal($denglu_last_id); // 同步评论到本地服务器
 				save_dcStateToLocal($denglu_commentState, $denglu_last_id['time']); // 同步评论状态到本地服务器
 				delete_same_comments(); // 删除相同评论
