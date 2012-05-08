@@ -364,11 +364,11 @@ if (!function_exists('denglu_importComment')) {
 
 	function wp_update_comment_agent($comment_ID, $cid = '') {
 		global $wpdb;
-		$comment_agent = $wpdb -> get_var("SELECT comment_agent FROM $wpdb->comments WHERE comment_ID = {$comment_ID} AND comment_agent not like '%Denglu%'");
-		if ($comment_agent) {
-			return wp_update_comment_key($comment_ID, 'comment_agent', trim($comment_agent . ' Denglu_' . $cid));
-		} 
-	} 
+		$comments = $wpdb -> get_row("SELECT comment_agent FROM $wpdb->comments WHERE comment_ID = {$comment_ID} AND comment_agent not like '%Denglu%'", ARRAY_A);
+		if ($comments) {
+			return wp_update_comment_key($comment_ID, 'comment_agent', trim($comments['comment_agent'] . ' Denglu_' . $cid));
+		}
+	}
 	// 导入评论
 	function denglu_importComment() {
 		@ini_set("max_execution_time", 300);
