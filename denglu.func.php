@@ -197,7 +197,7 @@ if (!function_exists('dengluComments')) {
 	        $wptm_basic = get_option('wptm_basic');
 	        $wptm_comment = get_option('wptm_comment');
 			if (is_object($post)) {
-				$media_url = wp_multi_media_url($post -> post_content, $post -> ID);
+				$media_url = preg_match_media_url($post -> post_content, $post -> ID);
 			} 
 ?>
 <script type='text/javascript' charset='utf-8' src='http://open.denglu.cc/connect/commentcode?appid=<?php echo $wptm_basic['appid'];?>&v=1.0.1'></script>

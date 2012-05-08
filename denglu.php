@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.6.1
+Version: 1.6.2
 */
 
 $wptm_basic = get_option('wptm_basic');

@@ -2,11 +2,9 @@
 //$_SESSION['wp_url_back'] = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
 $wptm_basic = get_option('wptm_basic');
 $wptm_comment = get_option('wptm_comment');
-if (empty($wptm_comment['comments_open']) || (!empty($wptm_comment['comments_open']) && comments_open())) :
-	$wptm_connect = get_option('wptm_connect');
-	if (is_object($post)) {
-	    $media_url = wp_multi_media_url($post -> post_content, $post -> ID);
-	}
+if (is_object($post)) {
+	$media_url = preg_match_media_url($post -> post_content, $post -> ID);
+}
 ?>
 <script type='text/javascript' charset='utf-8' src='http://open.denglu.cc/connect/commentcode?appid=<?php echo $wptm_basic['appid'];?>&v=1.0.1'></script>
 <script type="text/javascript" charset='utf-8'>
@@ -43,5 +41,4 @@ if ($wptm_comment['enable_seo'] && preg_match("/(Bot|Crawl|Spider|slurp|sohu-sea
 <script type="text/javascript">
     document.getElementById('dengluComments').style.display="none";
 </script>
-<?php endif; ?>
 <?php endif; ?>
