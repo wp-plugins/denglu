@@ -4,7 +4,7 @@ Donate link: http://www.denglu.cc/source/denglu-comments.html
 Tags: 灯鹭,社会化评论,Denglu,Denglu评论,评论,Denglu Comment,disqus,pinglunla,uyan,youyan,duoshuo,widget,sina,tencent,qq,qzone,Share
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 
 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 
@@ -66,13 +66,15 @@ Stable tag: 1.6.2
 
 == Changelog ==
 
-= 1.6.1 =
+= 1.6.3 =
 
 新增：灯鹭评论内容保存一份在WordPress本地评论数据库，新增更新时间控制，最少1分钟。（评论设置）
 
 修改：继承WordPress已有的评论开关，即当某篇文章关闭评论时，也不使用社会化评论功能，但是会显示以前的评论。
 
 修正：网站原有评论导入到灯鹭评论框时会出现的bug。
+
+修正：评论自定义函数加载无效的bug。
 
 = 1.6.0 =
 
