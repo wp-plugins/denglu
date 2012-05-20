@@ -23,7 +23,7 @@ if (!function_exists('class_http')) {
 		$r['ssl'] = $arrURL['scheme'] == 'https' || $arrURL['scheme'] == 'ssl';
 		$is_ssl = isset($r['ssl']) && $r['ssl'];
 		if ($is_ssl && !extension_loaded('openssl'))
-			return wp_die('您的主机不支持openssl');
+			return wp_die('您的主机不支持openssl，请查看<a href="' . MY_PLUGIN_URL . '/check.php" target="_blank">环境检查</a>');
 	} 
 	function class_http($url, $params = array()) {
 		if ($params['http']) {
@@ -38,7 +38,7 @@ if (!function_exists('class_http')) {
 				} elseif (function_exists('fsockopen')) {
 					$class = 'WP_Http_Fsockopen';
 				} else {
-					return wp_die('没有可以完成请求的 HTTP 传输器');
+					return wp_die('没有可以完成请求的 HTTP 传输器，请查看<a href="' . MY_PLUGIN_URL . '/check.php" target="_blank">环境检查</a>');
 				} 
 			} 
 		} 
@@ -49,14 +49,49 @@ if (!function_exists('class_http')) {
 			$error = $errors['http_request_failed'][0];
 			if (!$error)
 				$error = $errors['http_failure'][0];
-			if ($error == "couldn't connect to host") {
+			if ($error == "couldn't connect to host" || strpos($error, 'timed out') !== false) {
 				return;
 			} 
-			wp_die('出错了: ' . $error . '<br /><br />可能是您的主机不支持。');
+			wp_die('出错了: ' . $error . '<br /><br />可能是您的主机不支持，请查看<a href="' . MY_PLUGIN_URL . '/check.php" target="_blank">环境检查</a>');
 		} 
 		return $response['body'];
 	} 
-} 
+	function get_url_contents($url, $timeout = 30) {
+		if (!close_curl()) {
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			$content = curl_exec($ch);
+			curl_close($ch);
+			return $content;
+		} else {
+			$params = array();
+			if (@ini_get('allow_url_fopen')) {
+				if (function_exists('file_get_contents')) {
+					return file_get_contents($url);
+				} 
+				if (function_exists('fopen')) {
+					$params['http'] = 'streams';
+				} 
+			} elseif (function_exists('fsockopen')) {
+				$params['http'] = 'fsockopen';
+			} else {
+				return wp_die('没有可以完成请求的 HTTP 传输器，请查看<a href="' . MY_PLUGIN_URL . '/check.php" target="_blank">环境检查</a>');
+			} 
+			$params += array("method" => 'GET',
+				"timeout" => $timeout,
+				"sslverify" => false
+				);
+			return class_http($url, $params);
+		} 
+	} 
+	function get_url_array($url) {
+		return json_decode(get_url_contents($url), true);
+	} 
+}
 if (!function_exists('ifabc')) {
 	function ifab($a, $b) {
 		return $a ? $a : $b;

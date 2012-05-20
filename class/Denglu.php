@@ -2,8 +2,8 @@
 /**
  * 目的：把基础方法用protected的形式封装在base里，不直接展现给最终用户
  * @author hyperion_cc, smyx
- * @version 1.0.6
- * @created 2012-4-7 13:42:00
+ * @version 1.0.7
+ * @created 2012-5-21 00:00:00
  */
 class Denglu
 {
@@ -506,19 +506,7 @@ class Denglu
 	 */
 	///////function makeRequest($request)
 	protected function makeRequest($url, $post = '', $timeout = 30) {
-		$params = array(
-			"timeout" => $timeout,
-			"user-agent" => $_SERVER[HTTP_USER_AGENT],
-			"sslverify" => false,
-		);
-		if ($post){
-			$params['method'] = 'POST';
-		    $params['body'] = $post;
-		} else {
-		    $params['method'] = 'GET';
-		}
-		//return var_dump($url .= '?'.$post);
-		return class_http($url, $params); //new
+		return get_url_contents($url.'?'.$post, $timeout);
 	}
 
 	/**
