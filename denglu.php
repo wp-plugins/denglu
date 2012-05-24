@@ -1,140 +1,682 @@
 <?php
-/*
-Plugin Name: Dengluè¯„è®º
-Author: æ°´è„‰çƒŸé¦™
-Author URI: http://www.smyx.net/
-Plugin URI: http://wordpress.org/extend/plugins/denglu/
-Description: ç¯é¹­æä¾›çš„ç¤¾ä¼šåŒ–è¯„è®ºæ¡†ï¼Œä½¿ç”¨æ–°æµªå¾®åšã€QQã€äººäººã€360ã€Googleã€Twitterã€Facebookç­‰20å®¶åˆä½œç½‘ç«™å¸å·ç™»å½•å¹¶è¯„è®ºã€‚
-Version: 1.6.4
-*/
+/**
+ * Ä¿µÄ£º°Ñ»ù´¡·½·¨ÓÃprotectedµÄÐÎÊ½·â×°ÔÚbaseÀï£¬²»Ö±½ÓÕ¹ÏÖ¸ø×îÖÕÓÃ»§
+ * @author hyperion_cc, smyx
+ * @version 1.0.7
+ * @created 2012-5-21 00:00:00
+ */
+class Denglu
+{
+	protected $appID;
+	protected $apiKey;
+	protected $enableSSL;
 
-$wptm_basic = get_option('wptm_basic');
-$wptm_comment = get_option('wptm_comment');
+	/**
+	 * denglu APIµÄÓòÃû£¬Ä¬ÈÏhttp://open.denglu.cc
+	 * ÉèÖÃ´ËÊôÐÔÒÔÂú×ãÒÔºóÓÐ×ö¶þ¼¶ÓòÃûÖØ¶¨ÏòÐèÇóµÄ¿Í»§
+	 */
+	protected $domain = 'http://open.denglu.cc';
+	/**
+	 * DENGLU RESTful APIµÄµØÖ·
+	 */
+	protected $apiPath = array(
+		'bind' => '/api/v3/bind',
+		'unbind' => '/api/v3/unbind',
+		'login' => '/api/v3/send_login_feed',
+		'getUserInfo' => '/api/v3/user_info',
+		'share' => '/api/v4/share',
+		'getMedia' => '/api/v3/get_media',
+		'unbindAll' => '/api/v3/all_unbind',
+		'getBind' => '/api/v3/bind_info',
+		'getInvite' => '/api/v3/friends',
+		'getRecommend' => '/api/v3/recommend_user',
+		'sendInvite' => '/api/v3/invite',
+		'register' => '/api/v4/create_account',
+		'importUser' => '/api/v4/import_user',
+	    'importComment' => '/api/v4/import_comment',
+		'commentCount' => '/api/v4/get_comment_count',
+	    'latestComment' => '/api/v4/latest_comment',
+		'getComments' => '/api/v4/get_comment_list',
+		'getCommentState' => '/api/v4/get_change_comment_ids'
+	);
 
-add_action('admin_notices', 'denglu_comments_warning');
-function denglu_comments_warning() {
-	if (version_compare(WP_CONNECT_VERSION, '2.0', '>')) {
-		echo '<div class="updated">';
-		echo "<p><strong>æ£€æµ‹åˆ°æ‚¨æ­£åœ¨ä½¿ç”¨â€œWordPressè¿žæŽ¥å¾®åšâ€æ’ä»¶ï¼Œè¯·ç›´æŽ¥ä½¿ç”¨â€œWordPressè¿žæŽ¥å¾®åšâ€çš„è¯„è®ºè®¾ç½®åŠŸèƒ½ï¼Œæ— éœ€å¦å¤–å®‰è£… ç¯é¹­ç¤¾ä¼šåŒ–è¯„è®º æ’ä»¶ï¼Œè°¢è°¢æ‚¨çš„æ”¯æŒï¼</strong></p>";
-		echo '</div>';
+	/*
+	 * ÏµÍ³µÄ±àÂë
+	 */
+	protected $charset;
+	/**
+	 * ProviderµÄÃ¶¾Ù£¬ÀïÃæ°üÀ¨ÁË/transfer/[name]µÄµØÖ·ºó×º
+	 */
+	protected $providers = array(
+		'google' => '/transfer/google',
+		'windowslive' => '/transfer/windowslive',
+		'sina' => '/transfer/sina',
+		'tencent' => '/transfer/tencent',
+		'sohu' => '/transfer/sohu',
+		'netease' => '/transfer/netease',
+		'renren' => '/transfer/renren',
+		'kaixin001' => '/transfer/kaixin001',
+		'douban' => '/transfer/douban',
+		'yahoo' => '/transfer/yahoo',
+		'qzone' => '/transfer/qzone',
+		'alipay' => '/transfer/alipay',
+		'taobao' => '/transfer/taobao',
+		'tianya' => '/transfer/tianya',
+		'alipayquick' => '/transfer/alipayquick',
+		'baidu' => '/transfer/baidu',
+	);
+	/**
+	 * µ±Ç°ÓÃ»§¸÷ÖÖÊôÐÔµÄÒ»¸ö»º´æ
+	 */
+	var $user;
+	/**
+	 * ´ËsdkµÄ°æ±¾ºÅ£¬³õÊ¼Îª1.0
+	 */
+	const VERSION = '1.0';
+
+	/**
+	 * ¼ÓÃÜ·½·¨
+	 */
+	protected $signatureMethod = 'MD5';
+
+	/**
+	 * ¹¹Ôìº¯Êý
+	 * @param appID	µÆðØºóÌ¨·ÖÅäµÄappID {@link http://open.denglu.cc}
+	 * @param apiKey	µÆðØºóÌ¨·ÖÅäµÄapiKey {@link http://open.denglu.cc}
+	 * #param charset ÏµÍ³Ê¹ÓÃµÄ±àÂëÀàÐÍutf-8 »ògbk
+	 * @param signatureMethod	Ç©ÃûËã·¨£¬ÔÝÊ±Ö»Ö§³ÖMD5
+	 */
+	function Denglu($appID, $apiKey, $charset, $signatureMethod = 'MD5')//
+	{
+		$this->appID = $appID;
+		$this->apiKey = $apiKey;
+		$this->signatureMethod = $signatureMethod;
+		$this->charset = $charset;
+		$this->setEnableSSL();
 	}
-}
 
-add_action('admin_menu', 'denglu_comments_add_page');
-function denglu_comments_add_page() {
-	if (version_compare(WP_CONNECT_VERSION, '2.0', '<')) {
-		add_options_page('Dengluè¯„è®º', 'Dengluè¯„è®º', 'manage_options', 'denglu', 'denglu_comments_do_page');
-	}
-}
-
-if (!function_exists('default_values')) { // è®¾ç½®é»˜è®¤å€¼
-	function default_values($key, $vaule, $array) {
-		if (!is_array($array)) {
-			return true;
-		} else {
-			if ($array[$key] == $vaule || !array_key_exists($key, $array)) {
-				return true;
-		    }
+	/**
+	 * »ñÈ¡µÇÂ½/°ó¶¨Á´½Ó
+	 * 
+	 * @param Provider
+	 *            Í¨¹ýDenglu.Provider p = Denglu.Provider.guess(mediaNameEn) »ñÈ¡¡£
+	 *            mediaNameEn»ñÈ¡Ã½ÌåÁÐ±íÖÐµÃµ½
+	 * @param uid
+	 *            ÓÃ»§ÍøÕ¾µÄÓÃ»§ID£¬°ó¶¨Ê±ÐèÒª£¨Ã»ÓÐÌá¹©¼´Îª·Ç°ó¶¨£¬Ò²¾ÍÊÇµÇÂ¼£©
+	 * @throws DengluException
+	 */
+	function getAuthUrl($Provider, $uid = 0)
+	{
+		$authUrl = $this->domain;
+		
+		if(isset($this->providers[$Provider])){
+			$authUrl .= $this->providers[$Provider];
+		}else{
+			return array('errorCode'=>1,'errorDescription'=>'Please update your denglu-scripts to the latest version!');
 		}
-	} 
-}
+		
+		if($uid>0){
+			$authUrl .= '?uid='.$uid;
+		}
+		
+		return $authUrl;
+	}
 
-if (!function_exists('denglu_comments') && $wptm_comment['enable_comment'] && $wptm_basic['appid'] && $wptm_basic['appkey']) {
-	define("MY_PLUGIN_URL" , plugins_url('denglu'));
-	include_once(dirname(__FILE__) . '/denglu.func.php'); // ç¯é¹­è‡ªå®šä¹‰å‡½æ•°
-	if (!$wptm_comment['manual']) {
-		add_filter('comments_template', 'denglu_comments');
-		function denglu_comments($file) {
-			global $post;
-			if (comments_open()) {
-				return dirname(__FILE__) . '/comments.php';
-			} 
-		} 
-	} 
-}
+	function register($content)
+	{
+		return $this->callApi('register',array('data'=>$content));
+	}
 
-// è®¾ç½®
-function denglu_comments_do_page() {
-	if (isset($_POST['basic_options'])) {
-		update_option("wptm_basic", array('appid'=>trim($_POST['appid']), 'appkey'=>trim($_POST['appkey'])));
-	} elseif (isset($_POST['comment_options'])) {
-		update_option("wptm_comment", array('enable_comment' => trim($_POST['enable_comment']), 'manual' => trim($_POST['manual']), 'comments_open' => trim($_POST['comments_open']), 'dcToLocal' => trim($_POST['dcToLocal']), 'time' => trim($_POST['time']), 'latest_comments' => trim($_POST['latest_comments']), 'enable_seo' => trim($_POST['enable_seo'])));
-	} elseif (isset($_POST['comment_delete'])) {
-		delete_option("wptm_basic");
-		delete_option("wptm_comment");
-	} elseif (isset($_POST['importComment'])) { // è¯„è®ºå¯¼å…¥åˆ°ç¯é¹­
-		if (function_exists('denglu_importComment')) {
-			denglu_importComment();
-			echo '<div class="updated"><p><strong>è¯„è®ºå¯¼å…¥æˆåŠŸï¼</strong></p></div>';
+	function importUser($content)
+	{
+		return $this->callApi('importUser',array('appid'=>$this->appID, 'data'=>$content));
+	}
+
+	function importComment($content)
+	{
+		return $this->callApi('importComment',array('appid'=>$this->appID, 'data'=>$content));
+	}
+
+	function commentCount($postid = '', $url = '') // $postid,$url´«Ò»¸ö
+	{
+		return $this->callApi('commentCount',array('appid'=>$this->appID, 'postid'=>$postid, 'url'=>$url),12);
+	}
+
+	function latestComment($count)
+	{
+		return $this->callApi('latestComment',array('appid'=>$this->appID, 'count'=>$count),12);
+	}
+
+	function getComments($commentid, $count = 50)
+	{
+		return $this->callApi('getComments',array('appid'=>$this->appID, 'commentid'=>$commentid, 'count'=>$count),12);
+	}
+
+	function getCommentState($time)
+	{
+		return $this->callApi('getCommentState',array('appid'=>$this->appID, 'time'=>$time),12);
+	}
+
+	/**
+	 * ¸ù¾Ýtoken»ñÈ¡ÓÃ»§ÐÅÏ¢
+	 *
+	 * @param token
+	 * 
+	 * ·µ»ØÖµ eg:
+	 * {
+	 * 		"mediaID":7,							// Ã½ÌåID
+	 * 		"createTime":"2011-05-20 16:44:19",		// ´´½¨Ê±¼ä
+	 * 		"friendsCount":0,						// ºÃÓÑÊý
+	 * 		"location":null,						// µØÖ·
+	 * 		"favouritesCount":0,					// ÊÕ²ØÊý
+	 * 		"screenName":"denglu",					// ÏÔÊ¾ÐÕÃû
+	 * 		"profileImageUrl":"http://head.xiaonei.com/photos/0/0/men_main.gif",		// ¸öÈËÍ·Ïñ
+	 * 		"mediaUserID":61,						// ÓÃ»§ID
+	 * 		"url":null,								// ÓÃ»§²©¿Í/Ö÷Ò³µØÖ·
+	 * 		"city":null,							// ³ÇÊÐ
+	 * 		"description":null,						// ¸öÈËÃèÊö
+	 * 		"createdAt":"",							// ÔÚÃ½ÌåÉÏµÄ´´½¨Ê±¼ä
+	 * 		"verified":0,							// ÈÏÖ¤±êÖ¾
+	 * 		"name":null,							// ÓÑºÃÏÔÊ¾Ãû³Æ
+	 * 		"domain":null,							// ÓÃ»§¸öÐÔ»¯URL
+	 * 		"province":null,						// Ê¡·Ý
+	 * 		"followersCount":0,						// ·ÛË¿Êý
+	 * 		"gender":1,								// ÐÔ±ð 1--ÄÐ£¬0--Å®,2--Î´Öª
+	 * 		"statusesCount":0,						// Î¢²©/ÈÕ¼ÇÊý
+	 * 		"personID":120							// ¸öÈËID
+	 * }
+	 */
+	function getUserInfoByToken($token, $refresh = false)
+	{
+		return $this->callApi('getUserInfo',array('token'=>$token));
+	}
+
+	/**
+	 * »ñÈ¡ÒÑÑ¡ÔñÆ½Ì¨¹©Ó¦ÉÌ 
+	 * 
+	 * 
+	 * ·µ»ØÖµ eg:
+	 * [
+	 * 		{
+	 * 			"mediaID":7,																		// ID
+	 * 			"mediaIconImageGif":"http://test.denglu.cc/images/denglu_second_icon_7.gif",		// Éç»á»¯Ã½ÌåÁÁÉ«Icon
+	 * 			"mediaIconImage":"http://test.denglu.cc/images/denglu_second_icon_7.png",			// Éç»á»¯Ã½ÌåÁÁÉ«Icon
+	 * 			"mediaNameEn":"renren",																// Éç»á»¯Ã½ÌåµÄÃû³ÆµÄÆ´Òô
+	 * 			"mediaIconNoImageGif":"http://test.denglu.cc/images/denglu_second_icon_no_7.gif",	// Éç»á»¯Ã½Ìå»ÒÉ«Icon
+	 * 			"mediaIconNoImage":"http://test.denglu.cc/images/denglu_second_icon_no_7.png",		// Éç»á»¯Ã½Ìå»ÒÉ«Icon
+	 * 			"mediaName":"ÈËÈËÍø",																// Éç»á»¯Ã½ÌåµÄÃû³Æ
+	 * 			"mediaImage":"http://test.denglu.cc/images/denglu_second_7.png",					// Éç»á»¯Ã½Ìå´óÍ¼±ê
+	 * 			"shareFlag":0,																		// ÊÇ·ñÓÐ·ÖÏí¹¦ÄÜ 0ÊÇ1·ñ
+	 * 			"apiKey":"704779c3dd474a44b612199e438ba8e2"											// Éç»á»¯Ã½ÌåµÄÓ¦ÓÃapikey
+	 * 		}
+	 * ]
+	 */
+	function getMedia()
+	{
+		return $this->callApi('getMedia',array('appid'=>$this->appID),12);
+	}
+	/**
+	 *
+	 * »ñµÃÍ¬Ò»ÓÃ»§µÄ¶à¸öÉç»á»¯Ã½ÌåÓÃ»§ÐÅÏ¢
+	 *
+	 * @param uid
+	 *			ÓÃ»§ÍøÕ¾µÄÓÃ»§ID(¿ÉÑ¡)
+	 *
+	 * @param muid
+	 *			Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 *
+	 * @return ·µ»ØÖµ
+	 * 				eq: array(
+	 * 				array('mediaUserID'=>100,'mediaID'=>10,'screenName'=>'ÕÅÈý'),
+	 * 				array('mediaUserID'=>101,'mediaID'=>11,'screenName'=>'ÀîËÄ'),
+	 * 				array('mediaUserID'=>102,'mediaID'=>12,'screenName'=>'ÍõÎå')
+	 * 				)
+	 *
+	 */
+	function getBind($muid, $uid = '')
+	{
+		$params = array();
+		$params['appid'] = $this->appID;
+		if ($muid)
+			$params['muid'] = $muid;
+		if ($uid)
+			$params['uid'] = $uid;
+		return $this->callApi('getBind',$params);
+	}
+
+	/**
+	 *
+	 * »ñÈ¡¿ÉÒÔÑûÇëµÄÃ½ÌåÓÃ»§ÁÐ±í
+	 *
+	 * @param uid
+	 *			ÓÃ»§ÍøÕ¾µÄÓÃ»§ID(¿ÉÑ¡)
+	 *
+	 * @param muid
+	 *			Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 *
+	 * @return ·µ»ØÖµ
+	 * 				eq: array(
+	 * 				array('mediaUserID'=>100,'mediaID'=>10,'screenName'=>'ÕÅÈý'),
+	 * 				array('mediaUserID'=>101,'mediaID'=>11,'screenName'=>'ÀîËÄ'),
+	 * 				array('mediaUserID'=>102,'mediaID'=>12,'screenName'=>'ÍõÎå')
+	 * 				)
+	 *
+	 */
+	function getInvite($muid,$uid=null)
+	{
+		if(empty($muid) || !isset($muid)){
+			return $this->callApi('getBind',array('appid'=>$this->appID, 'uid'=>$uid));
+		}
+		return $this->callApi('getBind',array('appid'=>$this->appID, 'muid'=>$muid));
+	}
+
+	/**
+	 *
+	 * »ñÈ¡¿ÉÒÔÍÆ¼öµÄÃ½ÌåÓÃ»§ÁÐ±í
+	 *
+	 * @param uid
+	 *			ÓÃ»§ÍøÕ¾µÄÓÃ»§ID(¿ÉÑ¡)
+	 *
+	 * @param muid
+	 *			Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 *
+	 * @return ·µ»ØÖµ
+	 * 				eq: array(
+	 * 				array('mediaUserID'=>100,'mediaID'=>10,'screenName'=>'ÕÅÈý'),
+	 * 				array('mediaUserID'=>101,'mediaID'=>11,'screenName'=>'ÀîËÄ'),
+	 * 				array('mediaUserID'=>102,'mediaID'=>12,'screenName'=>'ÍõÎå')
+	 * 				)
+	 *
+	 */
+	function getRecommend($muid,$uid=null)
+	{
+		if(empty($muid) || !isset($muid)){
+			return $this->callApi('getBind',array('appid'=>$this->appID, 'uid'=>$uid));
+		}
+		return $this->callApi('getBind',array('appid'=>$this->appID, 'muid'=>$muid));
+	}
+
+	/**
+	 *
+	 * ·¢ËÍÑûÇë
+	 *
+	 * @param muid
+	 *			Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 *
+	 * @param uid
+	 *			ÓÃ»§ÍøÕ¾µÄÓÃ»§ID(¿ÉÑ¡)
+	 *
+	 * @return ·µ»ØÖµ eg: {"result": "1"}
+	 *
+	 */
+	function sendInvite($invitemuids, $muid, $uid=null)
+	{
+		if(empty($muid) || !isset($muid)){
+			return $this->callApi('sendInvite',array('appid'=>$this->appID, 'uid'=>$uid, 'invitemuid'=>$invitemuids));
+		}
+		return $this->callApi('sendInvite',array('appid'=>$this->appID, 'muid'=>$muid, 'invitemuid'=>$invitemuids));
+	}
+
+	/**
+	 * ÓÃ»§°ó¶¨¶à¸öÉç»á»¯Ã½ÌåÕËºÅµ½ÒÑÓÐÕËºÅÉÏ
+	 * 
+	 * @param mediaUID
+	 *            Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 * @param uid
+	 *            ÓÃ»§ÍøÕ¾ÄÇ±ßµÄÓÃ»§ID
+	 * @param uname
+	 *            ÓÃ»§ÍøÕ¾µÄêÇ³Æ
+	 * @param uemail
+	 *            ÓÃ»§ÍøÕ¾µÄÓÊÏä
+	 * @return ·µ»ØÖµ eg: {"result": "1"}
+	 */
+	function bind( $mediaUID, $uid, $uname, $uemail)
+	{
+		return $this->callApi('bind',array('appid'=>$this->appID,'muid'=>$mediaUID,'uid'=>$uid,'uname'=>$uname,'uemail'=>$uemail),12);
+	}
+
+	/**
+	 * ÓÃ»§½â³ý°ó¶¨Éç»á»¯Ã½ÌåÕËºÅ
+	 * 
+	 * @param mediaUID    Éç»á»¯Ã½ÌåµÄÓÃ»§ID
+	 *
+	 * ·µ»ØÖµ eg: {"result": "1"}
+	 */
+	function unbind( $mediaUID)
+	{
+		return $this->callApi('unbind',array('appid'=>$this->appID,'muid'=>$mediaUID),12);
+	}
+
+	/**
+	 * ·¢ËÍµÇÂ¼µÄÐÂÏÊÊÂ
+	 * 
+	 * @param mediaUserID    
+	 *               ´ÓµÆðØ»ñÈ¡µÄmediaUserID
+	 *
+	 * ·µ»ØÖµ eg: {"result": "1"}
+	 */
+	function sendLoginFeed($mediaUserID)
+	{
+		return  $this->callApi('login',array('muid'=>$mediaUserID,'appid'=>$this->appID));
+	}
+
+	/**
+	 * ÓÃ»§·¢²¼Ìû×Ó¡¢ÈÕÖ¾µÈÐÅÏ¢Ê±£¬¿ÉÒÔ°Ñ´ËÐÅÏ¢·ÖÏíµ½µÚÈý·½
+	 * 
+	 * @param mediaUserID
+	 * @param content    ·ÖÏíÏÔÊ¾µÄÐÅÏ¢
+	 * @param url    ²é¿´ÐÅÏ¢µÄÁ´½Ó
+	 * @param uid    ÍøÕ¾ÓÃ»§µÄÎ¨Ò»ÐÔ±êÊ¶ID
+	 *
+	 * ·µ»ØÖµ eg: {"result": "1"}
+	 */
+	function share( $mediaUserID, $content, $url, $uid, $imageurl, $videourl, $param1, $param2)
+	{
+		return $this->callApi('share',array('appid'=>$this->appID,'muid'=>$mediaUserID,'uid'=>$uid,'content'=>$content,'imageurl'=>$imageurl,'videourl'=>$videourl,'param1'=>$param1,'param2'=>$param2,'url'=>$url));
+	}
+	
+	/**
+	 * ÓÃ»§½â³ýËùÓÐ°ó¶¨Éç»á»¯Ã½ÌåÕËºÅ
+	 * @param uid ÍøÕ¾ÓÃ»§µÄÎ¨Ò»ÐÔ±êÊ¶ID
+	 *
+	 * ·µ»ØÖµ eg: {"result": "1"} 
+	 */
+	function unbindAll($uid)
+	{
+		return $this->callApi('unbindAll',array('uid'=>$uid,'appid'=>$this->appID),12);
+	}
+
+	/**
+	 * ÎªHTTPÇëÇó¼ÓÇ©Ãû Ç©ÃûËã·¨£º A¡¢½«ÇëÇó²ÎÊý¸ñÊ½»¯Îª¡°key=value¡±¸ñÊ½
+	 * B¡¢½«ÉÏËß¸ñÊ½»¯ºÃµÄ²ÎÊý¼üÖµ¶Ô£¬ÒÔ×ÖµäÐòÉýÐòÅÅÁÐºó£¬Æ´½ÓÔÚÒ»Æð£»¡°key=valuekey=value¡±
+	 * C¡¢ÔÚÉÏÆ´½ÓºÃµÄ×Ö·û´®Ä©Î²×·¼ÓÉÏÓ¦ÓÃµÄapi Key D¡¢ÉÏÊö×Ö·û´®µÄMD5Öµ¼´ÎªÇ©ÃûµÄÖµ
+	 * 
+	 * @param request
+	 */
+	protected function signRequest($request)
+	{
+		ksort($request);
+		$sig = '';
+		foreach($request as $key=>$value) {
+			$sig .= "$key=$value";
+		}
+		$sig .= $this->apiKey;
+		return md5($sig);
+	}
+	
+	/**
+	 * ½«Íâ²¿´«½øÀ´µÄ²ÎÊý×ª»»³Éhttp¸ñÊ½
+	 * @param param Êý×é
+	 */
+	protected function createPostBody($param){
+		foreach($param as $key => $v){
+			if(is_array($v)){
+				$param[$key] = implode(',',$v);
+			}
+			if(strtolower($this->charset)!='utf-8'){
+				$param[$key] = $this->charsetConvert($v,'UTF-8','GBK');
+			}
+		}
+		$param['timestamp'] = time().'000';
+		$param['sign_type'] = $this->signatureMethod;
+		$param['sign']  = $this->signRequest($param);
+	
+		$arr = array();
+		foreach($param as $key => $v){
+			$arr[] = $key.'='.urlencode($v);
+		}
+		return implode('&',$arr);
+	}
+	/**
+	 * ·¢ËÍhttpÇëÇó²¢»ñµÃ·µ»ØÐÅÏ¢
+	 * @param method ÇëÇóµÄapiÀàÐÍ
+	 * @param request ¸ÃÇëÇóËù·¢ËÍµÄ²ÎÊý
+	 * @param return ±¾ÇëÇóÊÇ·ñÓÐ·µ»ØÖµ 
+	 */
+	protected function callApi($method,$request=array(),$timeout = ''){
+		$apiPath = $this->getapiPath($method);
+		$post = $this->createPostBody($request);
+		$result = $this->makeRequest($apiPath,$post,$timeout);
+		
+		$result = $this->parseJson($result);
+		if(strtolower($this->charset)=='gbk'){
+			$result = $this->charsetConvert($result, "GBK", "UTF-8");
+		}
+		
+		if(is_array($result) && isset($result['errorCode'])){
+			$this->throwAPIException($result);
+		}
+		
+		return $result;
+	}
+	/**
+	 * ±àÂë×ª»»
+	 * @param str ÐèÒª×ª»»µÄ×Ö·û´®
+	 * @param to Òª×ª»»³ÉµÄ±àÂë
+	 * @param from ×Ö·û´®µÄ³õÊ¼±àÂë
+	 */
+	protected function charsetConvert($str,$to,$from){
+		if(!function_exists('mb_convert_encoding')){
+			function mb_convert_encoding($string,$to,$from)
+			{
+				if ($from == "UTF-8")
+				$iso_string = utf8_decode($string);
+				else
+				if ($from == "UTF7-IMAP")
+				$iso_string = imap_utf7_decode($string);
+				else
+				$iso_string = $string;
+		
+				if ($to == "UTF-8")
+				return(utf8_encode($iso_string));
+				else
+				if ($to == "UTF7-IMAP")
+				return(imap_utf7_encode($iso_string));
+				else
+				return($iso_string);
+			}
+		}
+		if(is_array($str)){
+			foreach($str as $k => $v){
+				$k = $this->charsetConvert($k,$to,$from);
+				$v = $this->charsetConvert($v,$to,$from);
+				$str[$k] = $v;
+			}
+		}else{
+			return  mb_convert_encoding($str,$to,$from);
+		}
+		return $str;
+	}
+
+	/**
+	 *Å×³öÒì³£
+	 *@param result 
+	 *
+	 */
+	protected function throwAPIException($result){
+		$e = new DengluException($result);
+		
+		throw $e;
+	}
+
+	/**
+	 * ·¢ËÍHTTPÇëÇó²¢»ñµÃÏìÓ¦
+	 * @param url ÇëÇóµÄurlµØÖ·
+	 * @param request ·¢ËÍµÄhttp²ÎÊý
+	 */
+	///////function makeRequest($request)
+	protected function makeRequest($url, $post = '', $timeout = 30) {
+		$params = array(
+			"timeout" => $timeout,
+			"user-agent" => $_SERVER[HTTP_USER_AGENT],
+			"sslverify" => false,
+		);
+		if ($post){
+			$params['method'] = 'POST';
+		    $params['body'] = $post;
 		} else {
-			echo '<div class="updated"><p><strong>è¯·å…ˆå¼€å¯ç¤¾ä¼šåŒ–è¯„è®ºï¼Œå¹¶å¡«å†™APP IDå’ŒAPP Key</strong></p></div>';
+		    $params['method'] = 'GET';
+		}
+		//return var_dump($url .= '?'.$post);
+		return class_http($url, $params); //new
+	}
+
+	/**
+	 * ´ÓapiPathÊý×éÀï»ñµÃÏàÓ¦methodµÄÊµ¼Êµ÷ÓÃµØÖ·
+	 * 
+	 * @param method
+	 */
+	protected function getApiPath($method)
+	{
+		return $this->domain.$this->apiPath[$method];
+	}
+
+	/**
+	 * ½âÎöJSON×Ö·û´®
+	 * 
+	 * °Ñ´Ó½Ó¿Ú»ñÈ¡µ½µÄÊý¾Ý×ª»»³Éjson¸ñÊ½£¬ÔÚ½âÎöÖÐ½øÐÐ½Ó¿Ú·µ»Ø´íÎó·ÖÎö
+	 * 
+	 * @param input
+	 */
+	protected function parseJson($input)
+	{
+		if(!function_exists('json_decode'))
+		{
+			function json_decode($input)
+			{
+				$comment = false;
+				$out = '$x=';
+	 
+				for ($i=0; $i<strlen($input); $i++)
+				{
+					if (!$comment)
+					{
+					if (($input[$i] == '{') || ($input[$i] == '['))       $out .= ' array(';
+					else if (($input[$i] == '}') || ($input[$i] == ']'))   $out .= ')';
+					else if ($input[$i] == ':')    $out .= '=>';
+					else                         $out .= $input[$i];         
+				}
+				else $out .= $input[$i];
+				if ($input[$i] == '"' && $input[($i-1)]!="\\")    $comment = !$comment;
+				}
+				eval($out . ';');
+				return $x;
+			}
+		}
+		return json_decode($input,1);	
+	}
+
+	/**
+	 * 
+	 * @param input
+	 */
+	protected function base64Encode($input)
+	{
+		return base64_encode($input);
+	}
+
+	/**
+	 * 
+	 * @param input
+	 */
+	protected function base64Decode($input)
+	{
+		return base64_decode($input);
+	}
+
+	/**
+	 * 
+	 * @param input
+	 */
+
+	function getapiKey()
+	{
+		return $this->apiKey;
+	}
+
+	/**
+	 * 
+	 * @param newVal
+	 */
+	function setapiKey($newVal)
+	{
+		$this->apiKey = $newVal;
+	}
+
+	function getappID()
+	{
+		return $this->appID;
+	}
+
+	/**
+	 * 
+	 * @param newVal
+	 */
+	function setappID($newVal)
+	{
+		$this->appID = $newVal;
+	}
+
+	function setEnableSSL(){
+		if(function_exists('curl_init') && function_exists('curl_exec')){
+			$this->enableSSL = true;
 		}
 	}
-	$wptm_basic = get_option('wptm_basic');
-	$wptm_comment = get_option('wptm_comment');
+
+}
+
+/**
+ *Òì³£Àà
+* ´íÎóÀàÐÍ¶ÔÕÕ±í
+ * Code Description
+ * 1 	²ÎÊý´íÎó£¬Çë²Î¿¼APIÎÄµµ
+ * 2 	Õ¾µã²»´æÔÚ
+ * 3 	Ê±¼ä´ÁÓÐÎó
+ * 4 	Ö»Ö§³Ömd5Ç©Ãû
+ * 5 	Ç©Ãû²»ÕýÈ·
+ * 6 	tokenÒÑ¹ýÆÚ
+ * 7 	Ã½ÌåÓÃ»§²»´æÔÚ
+ * 8 	Ã½ÌåÓÃ»§ÒÑ°ó¶¨ÆäËûÓÃ»§
+ * 9 	Ã½ÌåÓÃ»§ÒÑ½â°ó
+ * 10 	Î´Öª´íÎó
+ */ 
+
+class DengluException extends Exception
+{
+
+	var $errorCode;
+	var $errorDescription;
+
+	function DengluException($result)
+	{
+		$this->result = $result;
+		$this->errorCode = $result['errorCode'];
+		$this->errorDescription = $result['errorDescription'];
+		
+		parent::__construct($this->errorDescription, $this->errorCode);
+	}
+
+
+
+	function geterrorCode()
+	{
+		return $this->errorCode;
+	}
+
+	/**
+	 * 
+	 * @param newVal
+	 */
+	function seterrorCode($newVal)
+	{
+		$this->errorCode = $newVal;
+	}
+
+	function geterrorDescription()
+	{
+		return $this->errorDescription;
+	}
+
+	
+}
 ?>
-<div class="wrap">
-  <h2>Dengluè¯„è®º</h2>
-      <p style="color:green"><strong>ä½¿ç”¨å‰ï¼Œè¯·å…ˆåœ¨ <a href="http://open.denglu.cc" target="_blank">ç¯é¹­æŽ§åˆ¶å°</a> æ³¨å†Œå¸å·ï¼Œå¹¶åˆ›å»ºç«™ç‚¹ï¼Œä¹‹åŽåœ¨ä¸‹é¢å¡«å†™APP ID å’Œ APP Key ï¼Œè¯„è®ºçš„ç›¸å…³è®¾ç½®åŠç®¡ç†ï¼Œè¯·åœ¨ç¯é¹­æŽ§åˆ¶å°æ“ä½œã€‚<br />å¦‚æžœæ‚¨è¿˜éœ€è¦ä½¿ç”¨åˆä½œç½‘ç«™ç™»å½•åŠåŒæ­¥åŠŸèƒ½ï¼Œè¯·ç›´æŽ¥ä¸‹è½½ <a href="http://www.denglu.cc/source/wordpress2.0.html" target="_blank">WordPressè¿žæŽ¥å¾®åš</a> V2æ’ä»¶ï¼ˆé›†æˆäº†ç¤¾ä¼šåŒ–è¯„è®ºï¼‰ï¼Œè°¢è°¢æ‚¨çš„æ”¯æŒï¼</strong></p>
-      <form method="post" action="">
-        <?php wp_nonce_field('basic-options');?>
-        <h3>ç«™ç‚¹è®¾ç½®</h3>
-	    <table class="form-table">
-		    <tr>
-			    <td width="25%" valign="top">APP ID: </td>
-			    <td><label><input type="text" name="appid" size="32" value="<?php echo $wptm_basic['appid'];?>" /></label> (å¿…å¡«)</td>
-		    </tr>
-		    <tr>
-			    <td width="25%" valign="top">APP Key: </td>
-			    <td><label><input type="text" name="appkey" size="32" value="<?php echo $wptm_basic['appkey'];?>" /></label> (å¿…å¡«)</td>
-		    </tr>
-        </table>
-        <p class="submit">
-          <input type="submit" name="basic_options" class="button-primary" value="<?php _e('Save Changes') ?>" />
-        </p>
-      </form>
-      <form method="post" action="">
-        <?php wp_nonce_field('comment-options');?>
-        <h3>è¯„è®ºè®¾ç½®</h3>
-	    <table class="form-table">
-            <tr>
-                <td width="25%" valign="top">æ˜¯å¦å¼€å¯â€œç¤¾ä¼šåŒ–è¯„è®ºâ€åŠŸèƒ½</td>
-                <td><input name="enable_comment" type="checkbox" value="1" <?php if($wptm_comment['enable_comment']) echo "checked "; ?>></td>
-            </tr>
-		    <tr>
-			    <td width="25%" valign="top">è‡ªå®šä¹‰å‡½æ•°</td>
-			    <td><label><input name="manual" type="checkbox" value="1" <?php if($wptm_comment['manual']) echo "checked "; ?> />è‡ªå·±åœ¨ä¸»é¢˜æ·»åŠ å‡½æ•°ï¼ˆä¸æŽ¨èä½¿ç”¨ï¼‰</label><code>&lt;?php dengluComments();?&gt;</code></td>
-		    </tr>
-		    <tr>
-			    <td width="25%" valign="top">å•ç¯‡æ–‡ç« è¯„è®ºå¼€å…³</td>
-			    <td><label><input name="comments_open" type="checkbox" value="1" <?php if(default_values('comments_open', 1, $wptm_comment)) echo "checked ";?> />ç»§æ‰¿WordPresså·²æœ‰çš„è¯„è®ºå¼€å…³ï¼Œå³å½“æŸç¯‡æ–‡ç« å…³é—­è¯„è®ºæ—¶ï¼Œä¹Ÿä¸ä½¿ç”¨ç¤¾ä¼šåŒ–è¯„è®ºåŠŸèƒ½ã€‚</label></td>
-		    </tr>
-		    <tr>
-			    <td width="25%" valign="top">åŒæ­¥è¯„è®ºåˆ°æœ¬åœ°</td>
-			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> />ç¯é¹­è¯„è®ºå†…å®¹ä¿å­˜ä¸€ä»½åœ¨WordPressæœ¬åœ°è¯„è®ºæ•°æ®åº“</label> <label>(æ¯ <input name="time" type="text" size="1" maxlength="3" value="<?php echo ($wptm_comment['time']) ? $wptm_comment['time'] : '5'; ?>" onkeyup="value=value.replace(/[^0-9]/g,'')" /> åˆ†é’Ÿæ›´æ–°ä¸€æ¬¡)</label></td>
-		    </tr>
-		    <tr>
-			    <td width="25%" valign="top">æœ€æ–°è¯„è®º</td>
-			    <td><label><input name="latest_comments" type="checkbox" value="1" <?php if($wptm_comment['latest_comments']) echo "checked ";?> />æ˜¯å¦å¼€å¯ä¾§è¾¹æ â€œæœ€æ–°è¯„è®ºâ€åŠŸèƒ½ (å¼€å¯åŽåˆ°<a href="widgets.php">å°å·¥å…·</a>æ‹–æ‹½æ¿€æ´»)</label></td>
-		    </tr>
-		    <tr>
-			    <td width="25%" valign="top">SEOæ”¯æŒ</td>
-			    <td><label><input name="enable_seo" type="checkbox" value="1" <?php if($wptm_comment['enable_seo']) echo "checked "; ?> />è¯„è®ºæ”¯æŒSEOï¼Œè®©æœç´¢å¼•æ“Žèƒ½çˆ¬åˆ°è¯„è®ºæ•°æ®</label></td>
-		    </tr>
-        </table>
-        <p class="submit">
-          <input type="submit" name="comment_options" class="button-primary" value="<?php _e('Save Changes') ?>" />
-        </p>
-      </form>
-	  <h3>å¯¼å…¥å¯¼å‡º</h3>
-	  <p>å¯¼å…¥æ•°æ®åˆ°ç¯é¹­å¹³å°ã€‚å¯¼å…¥åŽï¼Œæ‚¨åŽŸæœ‰çš„ç½‘ç«™è¯„è®ºå°†åœ¨â€œDengluè¯„è®ºâ€çš„è¯„è®ºæ¡†å†…æ˜¾ç¤ºã€‚</p>
-	  <p><form method="post" action=""><span class="submit"><input type="submit" name="importComment" value="è¯„è®ºå¯¼å…¥" /> (å¯èƒ½éœ€è¦ä¸€äº›æ—¶é—´ï¼Œè¯·è€å¿ƒç­‰å¾…ï¼)</span></form></p>
-	  <h3>å¸è½½æ’ä»¶</h3>
-	  <p>å‡å¦‚æ‚¨è¦ä½¿ç”¨â€œWordPressè¿žæŽ¥å¾®åšâ€ V2.xæ’ä»¶ï¼Œå¯ä»¥ä¸å¿…å¸è½½æœ¬æ’ä»¶ï¼ŒçŽ°æœ‰çš„è®¾ç½®ä¸å˜ï¼</p>
-      <form method="post" action="">
-	    <?php wp_nonce_field('comment-delete');?>
-		<span class="submit"><input type="submit" name="comment_delete" value="å¸è½½æ’ä»¶" onclick="return confirm('æ‚¨ç¡®å®šè¦å¸è½½ç¤¾ä¼šåŒ–è¯„è®ºï¼Ÿ')" /></span>
-	  </form>
-</div>
-<?php
-}
