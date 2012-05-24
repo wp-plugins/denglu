@@ -506,7 +506,19 @@ class Denglu
 	 */
 	///////function makeRequest($request)
 	protected function makeRequest($url, $post = '', $timeout = 30) {
-		return get_url_contents($url.'?'.$post, $timeout);
+		$params = array(
+			"timeout" => $timeout,
+			"user-agent" => $_SERVER[HTTP_USER_AGENT],
+			"sslverify" => false,
+		);
+		if ($post){
+			$params['method'] = 'POST';
+		    $params['body'] = $post;
+		} else {
+		    $params['method'] = 'GET';
+		}
+		//return var_dump($url .= '?'.$post);
+		return class_http($url, $params); //new
 	}
 
 	/**
