@@ -433,7 +433,7 @@ class Denglu
 	 * @param request 该请求所发送的参数
 	 * @param return 本请求是否有返回值 
 	 */
-	protected function callApi($method,$request=array(),$timeout = ''){
+	protected function callApi($method,$request=array(),$timeout = 30){
 		$apiPath = $this->getapiPath($method);
 		$post = $this->createPostBody($request);
 		$result = $this->makeRequest($apiPath,$post,$timeout);
