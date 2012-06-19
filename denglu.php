@@ -115,32 +115,32 @@ function denglu_comments_do_page() {
         <h3>评论设置</h3>
 	    <table class="form-table">
             <tr>
-                <td width="25%" valign="top">是否开启“社会化评论”功能</td>
-                <td><input name="enable_comment" type="checkbox" value="1" <?php if($wptm_comment['enable_comment']) echo "checked "; ?>></td>
+                <td width="25%" valign="top">功能开启</td>
+                <td><label><input name="enable_comment" type="checkbox" value="1" <?php if($wptm_comment['enable_comment']) echo "checked "; ?>> 开启“社会化评论”功能</label></td>
             </tr>
 		    <tr>
 			    <td width="25%" valign="top">自定义函数</td>
-			    <td><label><input name="manual" type="checkbox" value="1" <?php if($wptm_comment['manual']) echo "checked "; ?> />自己在主题添加函数（不推荐使用）</label><code>&lt;?php dengluComments();?&gt;</code></td>
+			    <td><label><input name="manual" type="checkbox" value="1" <?php if($wptm_comment['manual']) echo "checked "; ?> /> 自己在主题添加函数（不推荐使用）</label><code>&lt;?php dengluComments();?&gt;</code></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">单篇文章评论开关</td>
-			    <td><label><input name="comments_open" type="checkbox" value="1" <?php if(default_values('comments_open', 1, $wptm_comment)) echo "checked ";?> />继承WordPress已有的评论开关，即当某篇文章关闭评论时，也不使用社会化评论功能。</label></td>
+			    <td><label><input name="comments_open" type="checkbox" value="1" <?php if(default_values('comments_open', 1, $wptm_comment)) echo "checked ";?> /> 继承WordPress已有的评论开关，即当某篇文章关闭评论时，也不使用社会化评论功能。</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">同步评论到本地</td>
-			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> />灯鹭评论内容保存一份在WordPress本地评论数据库</label> <label>(每 <input name="time" type="text" size="1" maxlength="3" value="<?php echo ($wptm_comment['time']) ? $wptm_comment['time'] : '5'; ?>" onkeyup="value=value.replace(/[^0-9]/g,'')" /> 分钟更新一次)</label></td>
+			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> /> 灯鹭评论内容保存一份在WordPress本地评论数据库</label> <label>(每 <input name="time" type="text" size="1" maxlength="3" value="<?php echo ($wptm_comment['time']) ? $wptm_comment['time'] : '5'; ?>" onkeyup="value=value.replace(/[^0-9]/g,'')" /> 分钟更新一次)</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">保存评论者头像到本地</td>
-			    <td><label><input name="comment_avatar" type="checkbox" value="<?php echo (!$wptm_comment['comment_avatar']) ? 1 : 2; ?>"<?php if($wptm_comment['comment_avatar']) echo "checked "; ?> />会创建一个新的数据库表(wp_comments_avatar)来保存</label></td>
+			    <td><label><input name="comment_avatar" type="checkbox" value="<?php echo (!$wptm_comment['comment_avatar']) ? 1 : 2; ?>"<?php if($wptm_comment['comment_avatar']) echo "checked "; ?> /> 会创建一个新的数据库表(wp_comments_avatar)来保存</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">最新评论</td>
-			    <td><label><input name="latest_comments" type="checkbox" value="1" <?php if($wptm_comment['latest_comments']) echo "checked ";?> />是否开启侧边栏“最新评论”功能 (开启后到<a href="widgets.php">小工具</a>拖拽激活)</label></td>
+			    <td><label><input name="latest_comments" type="checkbox" value="1" <?php if($wptm_comment['latest_comments']) echo "checked ";?> /> 开启侧边栏“最新评论”功能 (开启后到<a href="widgets.php">小工具</a>拖拽激活)</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">SEO支持</td>
-			    <td><label><input name="enable_seo" type="checkbox" value="1" <?php if($wptm_comment['enable_seo']) echo "checked "; ?> />评论支持SEO，让搜索引擎能爬到评论数据</label></td>
+			    <td><label><input name="enable_seo" type="checkbox" value="1" <?php if($wptm_comment['enable_seo']) echo "checked "; ?> /> 评论支持SEO，让搜索引擎能爬到评论数据</label></td>
 		    </tr>
         </table>
         <p class="submit">
