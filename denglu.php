@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.6.4
+Version: 1.6.5
 */
 
 $wptm_basic = get_option('wptm_basic');
@@ -24,8 +24,25 @@ add_action('admin_menu', 'denglu_comments_add_page');
 function denglu_comments_add_page() {
 	if (version_compare(WP_CONNECT_VERSION, '2.0', '<')) {
 		add_options_page('Denglu评论', 'Denglu评论', 'manage_options', 'denglu', 'denglu_comments_do_page');
-	}
-}
+		global $wptm_basic, $wptm_comment;
+		if ($wptm_basic['appid'] && $wptm_basic['appkey'] && current_user_can('manage_options')) {
+			add_object_page('灯鹭管理平台', '灯鹭管理平台', 'moderate_comments', 'denglu_admin', '', plugins_url('denglu') . '/images/logo_small.gif');
+			if (!$wptm_comment['enable_comment']) {
+				add_submenu_page('denglu_admin', '基础设置', '基础设置', 'manage_options', 'denglu_admin', 'denglu_basic');
+			} else {
+				add_submenu_page('denglu_admin', '评论内容管理', '评论内容管理', 'manage_options', 'denglu_admin', 'denglu_ocomment5');
+				add_submenu_page('denglu_admin', '评论框设置', '评论框设置', 'manage_options', 'denglu_ocomment2', 'denglu_ocomment2');
+				add_submenu_page('denglu_admin', '站点设置', '基础设置', 'manage_options', 'denglu_basic', 'denglu_basic');
+				add_submenu_page('denglu_admin', '选择评论模板', '选择评论模板', 'manage_options', 'denglu_ocomment7', 'denglu_ocomment7');
+				add_submenu_page('denglu_admin', '安全设置', '安全设置', 'manage_options', 'denglu_ocomment4', 'denglu_ocomment4');
+			} 
+			add_submenu_page('denglu_admin', '选择登录按钮', '<span style="color: red;">选择登录按钮</span>', 'manage_options', 'denglu_oprovider', 'denglu_oprovider');
+			add_submenu_page('denglu_admin', '填写开放平台KEY', '填写开放平台KEY', 'manage_options', 'denglu_oproviderKey', 'denglu_oproviderKey');
+			add_submenu_page('denglu_admin', '填写回调地址', '填写回调地址', 'manage_options', 'denglu_osetting', 'denglu_osetting');
+			add_submenu_page('denglu_admin', '数据统计', '<span style="color: red;">数据统计</span>', 'manage_options', 'lLoginUser', 'lLoginUser');
+		} 
+	} 
+} 
 
 if (!function_exists('default_values')) { // 设置默认值
 	function default_values($key, $vaule, $array) {
@@ -58,7 +75,7 @@ function denglu_comments_do_page() {
 	if (isset($_POST['basic_options'])) {
 		update_option("wptm_basic", array('appid'=>trim($_POST['appid']), 'appkey'=>trim($_POST['appkey'])));
 	} elseif (isset($_POST['comment_options'])) {
-		update_option("wptm_comment", array('enable_comment' => trim($_POST['enable_comment']), 'manual' => trim($_POST['manual']), 'comments_open' => trim($_POST['comments_open']), 'dcToLocal' => trim($_POST['dcToLocal']), 'time' => trim($_POST['time']), 'latest_comments' => trim($_POST['latest_comments']), 'enable_seo' => trim($_POST['enable_seo'])));
+		update_option("wptm_comment", array('enable_comment' => trim($_POST['enable_comment']), 'manual' => trim($_POST['manual']), 'comments_open' => trim($_POST['comments_open']), 'dcToLocal' => trim($_POST['dcToLocal']), 'comment_avatar' => trim($_POST['comment_avatar']), 'time' => trim($_POST['time']), 'latest_comments' => trim($_POST['latest_comments']), 'enable_seo' => trim($_POST['enable_seo'])));
 	} elseif (isset($_POST['comment_delete'])) {
 		delete_option("wptm_basic");
 		delete_option("wptm_comment");
@@ -75,7 +92,7 @@ function denglu_comments_do_page() {
 ?>
 <div class="wrap">
   <h2>Denglu评论</h2>
-      <p style="color:green"><strong>使用前，请先在 <a href="http://open.denglu.cc" target="_blank">灯鹭控制台</a> 注册帐号，并创建站点，之后在下面填写APP ID 和 APP Key ，评论的相关设置及管理，请在灯鹭控制台操作。<br />如果您还需要使用合作网站登录及同步功能，请直接下载 <a href="http://www.denglu.cc/source/wordpress2.0.html" target="_blank">WordPress连接微博</a> V2插件（集成了社会化评论），谢谢您的支持！</strong></p>
+      <p style="color:green"><strong>使用前，请先在 <a href="http://open.denglu.cc/codes/getCodes.jsp?siteType=3" target="_blank">灯鹭控制台</a> 注册帐号，并创建站点，之后在下面填写APP ID 和 APP Key ，评论的相关设置及管理，请在灯鹭控制台操作。<br />如果您还需要使用合作网站登录及同步功能，请直接下载 <a href="http://www.denglu.cc/source/wordpress2.0.html" target="_blank">WordPress连接微博</a> V2插件（集成了社会化评论），谢谢您的支持！</strong></p>
       <form method="post" action="">
         <?php wp_nonce_field('basic-options');?>
         <h3>站点设置</h3>
@@ -112,6 +129,10 @@ function denglu_comments_do_page() {
 		    <tr>
 			    <td width="25%" valign="top">同步评论到本地</td>
 			    <td><label><input name="dcToLocal" type="checkbox" value="1" <?php if(default_values('dcToLocal', 1, $wptm_comment)) echo "checked ";?> />灯鹭评论内容保存一份在WordPress本地评论数据库</label> <label>(每 <input name="time" type="text" size="1" maxlength="3" value="<?php echo ($wptm_comment['time']) ? $wptm_comment['time'] : '5'; ?>" onkeyup="value=value.replace(/[^0-9]/g,'')" /> 分钟更新一次)</label></td>
+		    </tr>
+		    <tr>
+			    <td width="25%" valign="top">保存评论者头像到本地</td>
+			    <td><label><input name="comment_avatar" type="checkbox" value="<?php echo (!$wptm_comment['comment_avatar']) ? 1 : 2; ?>"<?php if($wptm_comment['comment_avatar']) echo "checked "; ?> />会创建一个新的数据库表(wp_comments_avatar)来保存</label></td>
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">最新评论</td>
