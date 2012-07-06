@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.6.5
+Version: 1.6.6
 */
 
 $wptm_basic = get_option('wptm_basic');
@@ -26,20 +26,7 @@ function denglu_comments_add_page() {
 		add_options_page('Denglu评论', 'Denglu评论', 'manage_options', 'denglu', 'denglu_comments_do_page');
 		global $wptm_basic, $wptm_comment;
 		if ($wptm_basic['appid'] && $wptm_basic['appkey'] && current_user_can('manage_options')) {
-			add_object_page('灯鹭管理平台', '灯鹭管理平台', 'moderate_comments', 'denglu_admin', '', plugins_url('denglu') . '/images/logo_small.gif');
-			if (!$wptm_comment['enable_comment']) {
-				add_submenu_page('denglu_admin', '基础设置', '基础设置', 'manage_options', 'denglu_admin', 'denglu_basic');
-			} else {
-				add_submenu_page('denglu_admin', '评论内容管理', '评论内容管理', 'manage_options', 'denglu_admin', 'denglu_ocomment5');
-				add_submenu_page('denglu_admin', '评论框设置', '评论框设置', 'manage_options', 'denglu_ocomment2', 'denglu_ocomment2');
-				add_submenu_page('denglu_admin', '站点设置', '基础设置', 'manage_options', 'denglu_basic', 'denglu_basic');
-				add_submenu_page('denglu_admin', '选择评论模板', '选择评论模板', 'manage_options', 'denglu_ocomment7', 'denglu_ocomment7');
-				add_submenu_page('denglu_admin', '安全设置', '安全设置', 'manage_options', 'denglu_ocomment4', 'denglu_ocomment4');
-			} 
-			add_submenu_page('denglu_admin', '选择登录按钮', '<span style="color: red;">选择登录按钮</span>', 'manage_options', 'denglu_oprovider', 'denglu_oprovider');
-			add_submenu_page('denglu_admin', '填写开放平台KEY', '填写开放平台KEY', 'manage_options', 'denglu_oproviderKey', 'denglu_oproviderKey');
-			add_submenu_page('denglu_admin', '填写回调地址', '填写回调地址', 'manage_options', 'denglu_osetting', 'denglu_osetting');
-			add_submenu_page('denglu_admin', '数据统计', '<span style="color: red;">数据统计</span>', 'manage_options', 'lLoginUser', 'lLoginUser');
+			add_object_page('灯鹭评论管理', '灯鹭评论管理', 'moderate_comments', 'denglu_admin', 'denglu_ocomment5',  plugins_url('denglu') .'/images/logo_small.gif');
 		} 
 	} 
 } 

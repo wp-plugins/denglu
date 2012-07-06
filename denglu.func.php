@@ -210,48 +210,16 @@ if (!function_exists('denglu_admin')) {
 		global $wptm_basic;
 		$appid = $wptm_basic['appid'];
 		$appkey = $wptm_basic['appkey'];
-		$timestamp = time() . '000';
+		$timestamp = BJTIMESTAMP . '000';
 		$sign_type = "md5";
 		$version = "1.0";
 		$sign = md5('appid=' . $appid . 'sign_type=' . $sign_type . 'timestamp=' . $timestamp . 'version=' . $version . $appkey);
 		$denglu_url = 'http://open.denglu.cc/' . $vaule . '?open=' . base64_encode("appid=" . $appid . "&timestamp=" . $timestamp . "&version=" . $version . "&sign_type=" . $sign_type . "&sign=" . $sign);
+		echo '<p><strong>如果打开后没有登录，<a href="'.admin_url('admin.php?page=denglu_admin').'">请尝试点这里刷新</a> (您可以在“评论管理”页面对评论进行删除/修改操作，也会同步到本地数据库噢。)</strong></p>';
 		echo '<p><iframe width="100%" height="550" frameborder="0" src="' . $denglu_url . '"></iframe></p>';
 	} 
-	// 基础设置
-	function denglu_basic() {
-		return denglu_admin('setting/basic');
-	} 
-	// 评论框设置
-	function denglu_ocomment2() {
-		return denglu_admin('setup/ocomment2');
-	} 
-	// 安全设置
-	function denglu_ocomment4() {
-		return denglu_admin('setup/ocomment4');
-	} 
-	// 评论内容管理
 	function denglu_ocomment5() {
 		return denglu_admin('setup/ocomment5');
-	} 
-	// 选择评论模板
-	function denglu_ocomment7() {
-		return denglu_admin('setup/ocomment7');
-	} 
-	// 选择登录按钮
-	function denglu_oprovider() {
-		return denglu_admin('setup/oprovider');
-	} 
-	// 填写开放平台KEY
-	function denglu_oproviderKey() {
-		return denglu_admin('setup/oproviderKey');
-	} 
-	// 填写回调地址
-	function denglu_osetting() {
-		return denglu_admin('setup/osetting');
-	} 
-	// 数据统计服务
-	function lLoginUser() {
-		return denglu_admin('stats/lLoginUser');
 	} 
 }
 // 得到微博头像
@@ -918,7 +886,7 @@ if (!function_exists('dcToLocal')) {
     // 从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器 V2.4
 	add_action('wp_insert_comment','denglu_importReplyComment', 10, 2);
 	function denglu_importReplyComment($comment_id, $comment) {
-		if ($comment -> comment_approved != 1 || $comment -> comment_type == 'trackback' || $comment -> comment_type == 'pingback' || $comment -> comment_parent == 0) {
+		if ($comment -> comment_approved != 1 || $comment -> comment_type == 'trackback' || $comment -> comment_type == 'pingback' || $comment -> comment_parent == 0  || strpos($comment -> comment_agent, 'Denglu_') !== false) {
 			return $comment_id;
 		} 
 		$get_dlCommentID = get_dengluCommentID($comment -> comment_parent);
