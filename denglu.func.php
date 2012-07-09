@@ -315,9 +315,7 @@ if (!function_exists('dengluComments')) {
 }?>
     _dl_comment_widget.show(param);
 </script>
-<?php
-// 搜索引擎爬虫
-if ($wptm_comment['enable_seo'] && preg_match("/(Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla)/i", $_SERVER['HTTP_USER_AGENT']) && have_comments()) { ?>
+<?php if ($wptm_comment['enable_seo'] && have_comments()) { ?>
 <div id="dengluComments">
 	<h3 id="comments"><?php	printf( '《%2$s》有 %1$s 条评论', number_format_i18n( get_comments_number() ), '<em>' . get_the_title() . '</em>' );?></h3>
 	<div class="navigation">
