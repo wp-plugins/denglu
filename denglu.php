@@ -127,7 +127,7 @@ function denglu_comments_do_page() {
 		    </tr>
 		    <tr>
 			    <td width="25%" valign="top">SEO支持</td>
-			    <td><label><input name="enable_seo" type="checkbox" value="1" <?php if($wptm_comment['enable_seo']) echo "checked "; ?> /> 评论支持SEO，让搜索引擎能爬到评论数据</label></td>
+			    <td><label><input name="enable_seo" type="checkbox" value="1" <?php if(!$wptm_comment || $wptm_comment['enable_seo']) echo "checked "; ?> /> 评论支持SEO，让搜索引擎能爬到评论数据</label></td>
 		    </tr>
         </table>
         <p class="submit">
