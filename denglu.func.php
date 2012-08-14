@@ -306,7 +306,7 @@ if (!function_exists('dengluComments')) {
 <script type='text/javascript' charset='utf-8' src='http://open.denglu.cc/connect/commentcode?appid=<?php echo $wptm_basic['appid'];?>&v=1.0.1'></script>
 <script type="text/javascript" charset='utf-8'>
     var param = {};
-    param.title = "<?php echo urlencode(get_the_title());?>"; // 文章标题
+    param.title = "<?php echo rawurlencode(get_the_title());?>"; // 文章标题
     param.postid = "<?php the_ID();?>"; // 文章ID
 <?php
 	if ($media_url) { // 是否有视频、图片
