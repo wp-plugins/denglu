@@ -543,13 +543,13 @@ if (!function_exists('denglu_importComment')) {
 }
 
 /**
- * 最新评论 v2.3
+ * 最新评论 V2.3 (V2.4.3)
  */
 if (!function_exists('denglu_recent_comments')) {
 	// 获取最新评论
 	function get_denglu_recent_comments($count = '') {
 		$recentComments = get_option('denglu_recentComments');
-		if ($recentComments['comments'] && time() - $recentComments['time'] > 300) {
+		if ($recentComments['comments'] && time() - $recentComments['time'] < 300) {
 			return $recentComments;
 		} 
 		global $wptm_basic;
@@ -565,52 +565,32 @@ if (!function_exists('denglu_recent_comments')) {
 			update_option('denglu_recentComments', array('comments' => $output, 'time' => time()));
 			return array('comments' => $output);
 		} elseif ($recentComments['comments']) {
-			$recentComments['time'] = time() + 200;
+			$recentComments['time'] = time();
 			update_option('denglu_recentComments', $recentComments);
 			return $recentComments;
 		} 
 	} 
-	// 设置cookies
-	function denglu_recent_comments_cookie() {
-		global $wptm_comment;
-		if (!is_admin()) {
-			if ($wptm_comment['latest_comments'] && used_widget('wp-connect-comment-widget') && !$_COOKIE["denglu_recent_comments"]) {
-				if ($comments = get_denglu_recent_comments()) {
-					setcookie("denglu_recent_comments", json_encode($comments['comments']), time() + 300); //缓存5分钟
-				} 
-			} 
-		} 
-	} 
-	add_action('init', 'denglu_recent_comments_cookie', 0);
+
 	function denglu_recent_comments($comments) {
 		if (is_array($comments)) {
 			echo '<ul id="denglu_recentcomments">';
 			foreach($comments as $comment) {
-				echo "<li>" . $comment['name'] . ": <a href=\"{$comment['url']}\">" . $comment['content'] . "...</a></li>";
+				echo "<li>" . $comment['name'] . ": <a href=\"{$comment['url']}\">" . $comment['content'] . "</a></li>";
 			} 
 			echo '</ul>';
-		} 
-	} 
-
-	if (!function_exists('used_widget')) {
-		function used_widget($widget) {
-			$vaule = get_option('widget_' . $widget);
-			if (is_array($vaule) && count($vaule) > 1) {
-				return true;
-			} 
 		} 
 	} 
 
 	if ($wptm_comment['latest_comments']) {
 		include_once(dirname(__FILE__) . '/comments-widgets.php'); // 最新评论 小工具
 	} 
-}
+} 
 
 /**
  * 1.评论保存到本地服务器
  * 2.评论状态同步到本地服务器。
  * 3.从灯鹭服务器导入到本地的评论被回复了，再把这条回复导入到灯鹭服务器 V2.3.3 (V2.4)
- * V2.3 (V2.4)
+ * V2.3 (V2.4.3)
  */
 if (!function_exists('dcToLocal')) {
 	function get_weiboInfo($name) {
@@ -971,8 +951,16 @@ if (!function_exists('dcToLocal')) {
 		dcToLocal();
 		add_action('admin_notices', 'dengluComment_notice');
 	}
-    // 触发动作 V2.4
+    // 触发动作 V2.4.3
 	if (default_values('dcToLocal', 1, $wptm_comment)) {
+		function local_recent_comments($number) { // 调用本地的最新评论
+			$comments = get_comments( apply_filters( 'widget_comments_args', array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish' ) ) );
+			echo '<ul id="denglu_recentcomments">';
+			foreach((array) $comments as $comment) {
+				echo '<li>' . $comment->comment_author . ': <a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">' . $comment->comment_content . '</a></li>';
+			} 
+			echo '</ul>';
+		}
 		if (!is_admin()) {
 			add_action('init', 'dcToLocal');
 		} else {

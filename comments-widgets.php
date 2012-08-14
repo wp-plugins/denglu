@@ -20,16 +20,15 @@ if (!class_exists('WP_Connect_Comment_Widget')) {
 			echo $before_widget;
 			if ($title)
 				echo $before_title . $title . $after_title;
-			if ($_COOKIE["denglu_recent_comments"]) {
-				$comments = php_array_slice(json_decode(stripslashes($_COOKIE["denglu_recent_comments"]), true), 0, $number , true);
-		    } elseif (is_array($_SESSION['denglu_recent_comments'])) {
-				$comments = php_array_slice($_SESSION['denglu_recent_comments'], 0, $number , true);
-			} else { // V2.3
-				$recentComments = get_denglu_recent_comments($number);
-				$comments = $recentComments['comments'];
-				$_SESSION['denglu_recent_comments'] = $comments;
+			if (function_exists('local_recent_comments')) {
+				local_recent_comments($number);
+			} else {
+				$recentComments = get_denglu_recent_comments();
+				if ($recentComments['comments']) {
+					$comments = php_array_slice($recentComments['comments'], 0, $number, true);
+					denglu_recent_comments($comments);
+				}
 			}
-			denglu_recent_comments($comments);
 			echo $after_widget;
 		} 
 		// processes widget options to be saved
