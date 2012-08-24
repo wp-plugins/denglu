@@ -161,6 +161,10 @@ if (!function_exists('preg_match_media_url')) {
 		$v_sum = count($video[1]);
 		if ($v_sum > 0) {
 			$v = $video[1][0];
+		} else {
+			$content = str_replace(array("[/", "</"), "\n", $content);
+			preg_match_all('/http:\/\/(v.youku.com\/v_show|www.tudou.com\/(programs\/view|albumplay|listplay))+(?(?=[\/])(.*))/', $content, $match);
+			if (count($match[0]) > 0) $v = trim($match[0][0]);
 		} 
 		$p_sum = count($image[1]);
 		if ($p_sum > 0) {
@@ -215,7 +219,7 @@ if (!function_exists('denglu_admin')) {
 		$version = "1.0";
 		$sign = md5('appid=' . $appid . 'sign_type=' . $sign_type . 'timestamp=' . $timestamp . 'version=' . $version . $appkey);
 		$denglu_url = 'http://open.denglu.cc/' . $vaule . '?open=' . base64_encode("appid=" . $appid . "&timestamp=" . $timestamp . "&version=" . $version . "&sign_type=" . $sign_type . "&sign=" . $sign);
-		echo '<p><strong>如果打开后没有登录，<a href="'.admin_url('admin.php?page=denglu_admin').'">请尝试点这里刷新</a> (您可以在“评论管理”页面对评论进行删除/修改操作，也会同步到本地数据库噢。)</strong></p>';
+		echo '<p><strong>您可以在“评论管理”页面对评论进行删除/修改操作，也会同步到本地数据库噢。 <a href="' . $denglu_url . '" target="_blank">请新窗口打开</a></strong></p>';
 		echo '<p><iframe width="100%" height="550" frameborder="0" src="' . $denglu_url . '"></iframe></p>';
 	} 
 	function denglu_ocomment5() {
@@ -268,7 +272,7 @@ if (!function_exists('wp_get_weibo_head')) {
 	} 
 }
 // 显示新浪微博用户头像
-add_filter("get_avatar", "denglu_avatar", 10, 3);
+add_filter("get_avatar", "denglu_avatar", 9, 3);
 function denglu_avatar($avatar, $id_or_email = '', $size = '32') {
 	global $comment;
 	if (is_object($comment)) {
