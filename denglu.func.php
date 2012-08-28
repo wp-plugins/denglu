@@ -303,6 +303,8 @@ if (!function_exists('dengluComments')) {
 		if (comments_open()) {
 	        $wptm_basic = get_option('wptm_basic');
 	        $wptm_comment = get_option('wptm_comment');
+			$user = wp_get_current_user();
+			if ($user) $userinfo = base64_encode($user->display_name.','.$user->user_email);
 			if (is_object($post)) {
 				$media_url = preg_match_media_url($post -> post_content, $post -> ID);
 			} 
@@ -316,7 +318,10 @@ if (!function_exists('dengluComments')) {
 	if ($media_url) { // 是否有视频、图片
     echo "param.image = \"" . $media_url[0] ."\";\n"; // 需要同步的图片地址
     echo "param.video = \"" . $media_url[1] ."\";\n"; // 需要同步的视频地址，支持土豆优酷等
-}?>
+    }
+	echo (!is_user_logged_in()) ? "" :"param.userinfo = \"".$userinfo."\";param.login = true;\n"; // 是否已经登录
+	echo "param.exit = \"".urlencode(wp_logout_url(get_permalink()))."\";\n"; // 退出链接
+?>
     _dl_comment_widget.show(param);
 </script>
 <?php if ($wptm_comment['enable_seo'] && have_comments()) { ?>
@@ -957,14 +962,21 @@ if (!function_exists('dcToLocal')) {
 	}
     // 触发动作 V2.4.3
 	if (default_values('dcToLocal', 1, $wptm_comment)) {
-		function local_recent_comments($number) { // 调用本地的最新评论
-			$comments = get_comments( apply_filters( 'widget_comments_args', array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish' ) ) );
+		function local_recent_comments($number, $avatar = '') { // 调用本地的最新评论 v2.4.4
+			$comments = get_comments(apply_filters('widget_comments_args', array('number' => $number, 'status' => 'approve', 'post_status' => 'publish')));
 			echo '<ul id="denglu_recentcomments">';
-			foreach((array) $comments as $comment) {
-				echo '<li>' . $comment->comment_author . ': <a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">' . $comment->comment_content . '</a></li>';
+			if (!$avatar) {
+				foreach((array) $comments as $comment) {
+					echo '<li>' . $comment -> comment_author . ': <a href="' . esc_url(get_comment_link($comment -> comment_ID)) . '">' . $comment -> comment_content . '</a></li>';
+				} 
+			} else {
+				echo "<style type=\"text/css\" media=\"screen\">#denglu_recentcomments li{margin-top:5px;display:block}#denglu_recentcomments .avatar{display:inline;float:left;margin-right:8px;border-radius:3px 3px 3px 3px;}#denglu_recentcomments .rc-info, #denglu_recentcomments .rc-content{overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;white-space:nowrap;}</style>";
+				foreach((array) $comments as $comment) {
+					echo '<li>' . get_avatar($comment, 36) . '<div class="rc-info"><a href="' . esc_url(get_comment_link($comment -> comment_ID)) . '">' . $comment -> comment_author . '</a></div><div class="rc-content">' . $comment -> comment_content . '&nbsp;</div></li>';
+				} 
 			} 
 			echo '</ul>';
-		}
+		} 
 		if (!is_admin()) {
 			add_action('init', 'dcToLocal');
 		} else {

@@ -2,6 +2,8 @@
 //$_SESSION['wp_url_back'] = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $wptm_basic = get_option('wptm_basic');
 $wptm_comment = get_option('wptm_comment');
+$user = wp_get_current_user();
+if ($user) $userinfo = base64_encode($user->display_name.','.$user->user_email);
 if (is_object($post)) {
 	$media_url = preg_match_media_url($post -> post_content, $post -> ID);
 }
@@ -15,7 +17,10 @@ if (is_object($post)) {
 	if ($media_url) { // 是否有视频、图片
     echo "param.image = \"" . $media_url[0] ."\";\n"; // 需要同步的图片地址
     echo "param.video = \"" . $media_url[1] ."\";\n"; // 需要同步的视频地址，支持土豆优酷等
-}?>
+    }
+	echo (!is_user_logged_in()) ? "" :"param.userinfo = \"".$userinfo."\";param.login = true;\n"; // 是否已经登录
+	echo "param.exit = \"".urlencode(wp_logout_url(get_permalink()))."\";\n"; // 退出链接
+?>
     _dl_comment_widget.show(param);
 </script>
 <?php if ($wptm_comment['enable_seo'] && have_comments()) : ?>
