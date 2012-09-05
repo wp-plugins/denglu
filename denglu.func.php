@@ -177,6 +177,13 @@ if (!function_exists('preg_match_media_url')) {
 			return array($p, $v);
 	} 
 }
+// 得到图片url
+if (!function_exists('get_image_url')) {
+	function get_image_url($content) {
+		preg_match_all('/<img[^>]+src=[\'"](http[^\'"]+)[\'"].*>/isU', $content, $image);
+		return $image[1][0];
+	} 
+}
 // 保存wp_comments表某个字段
 if (!function_exists('wp_update_comment_key')) {
 	function wp_update_comment_key($comment_ID, $comment_key, $vaule) {
@@ -304,7 +311,11 @@ if (!function_exists('dengluComments')) {
 	        $wptm_basic = get_option('wptm_basic');
 	        $wptm_comment = get_option('wptm_comment');
 			$user = wp_get_current_user();
-			if ($user) $userinfo = base64_encode($user->display_name.','.$user->user_email);
+			if ($user->ID) {
+				$head = get_image_url(get_avatar($user->ID, 50));
+				if (strpos($head, "gravatar.com/avatar") !== false) $head = "";
+				$userinfo = base64_encode($user->display_name.','.$user->user_email.','.$head);
+			} 
 			if (is_object($post)) {
 				$media_url = preg_match_media_url($post -> post_content, $post -> ID);
 			} 

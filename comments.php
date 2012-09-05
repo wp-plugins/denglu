@@ -3,7 +3,11 @@
 $wptm_basic = get_option('wptm_basic');
 $wptm_comment = get_option('wptm_comment');
 $user = wp_get_current_user();
-if ($user) $userinfo = base64_encode($user->display_name.','.$user->user_email);
+if ($user->ID) {
+	$head = get_image_url(get_avatar($user->ID, 50));
+	if (strpos($head, "gravatar.com/avatar") !== false) $head = "";
+	$userinfo = base64_encode($user->display_name.','.$user->user_email.','.$head);
+} 
 if (is_object($post)) {
 	$media_url = preg_match_media_url($post -> post_content, $post -> ID);
 }
