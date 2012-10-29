@@ -178,8 +178,8 @@ if (!function_exists('preg_match_media_url')) {
 	} 
 }
 // 得到图片url
-if (!function_exists('get_image_url')) {
-	function get_image_url($content) {
+if (!function_exists('get_content_pic')) {
+	function get_content_pic($content) {
 		preg_match_all('/<img[^>]+src=[\'"](http[^\'"]+)[\'"].*>/isU', $content, $image);
 		return $image[1][0];
 	} 
@@ -312,7 +312,7 @@ if (!function_exists('dengluComments')) {
 	        $wptm_comment = get_option('wptm_comment');
 			$user = wp_get_current_user();
 			if ($user->ID) {
-				$head = get_image_url(get_avatar($user->ID, 50));
+				$head = get_content_pic(get_avatar($user->ID, 50));
 				if (strpos($head, "gravatar.com/avatar") !== false) $head = "";
 				$userinfo = base64_encode($user->display_name.','.$user->user_email.','.$head);
 			} 
