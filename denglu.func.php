@@ -46,7 +46,7 @@ if (!function_exists('class_http')) {
 		$http = new $class;
 		$response = $http -> request($url, $params);
 		if (!is_array($response)) {
-			if (@ini_get('allow_url_fopen') && function_exists('file_get_contents')) {
+			if ($params['method'] == 'GET' && @ini_get('allow_url_fopen') && function_exists('file_get_contents')) {
 				return file_get_contents($url . '?' . $params['body']);
 			} 
 			$errors = $response -> errors;
