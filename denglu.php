@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.7
+Version: 1.7.1
 */
 
 $wptm_basic = get_option('wptm_basic');
@@ -14,7 +14,7 @@ $wptm_comment = get_option('wptm_comment');
 add_action('admin_notices', 'denglu_comments_warning');
 function denglu_comments_warning() {
 	if (current_user_can('manage_options')) {
-		if (version_compare(WP_CONNECT_VERSION, '2.0', '>')) {
+		if (substr(WP_CONNECT_VERSION, 0, 1) == 2) {
 			echo '<div class="updated">';
 			echo "<p><strong>检测到您正在使用“WordPress连接微博”插件，请直接使用“WordPress连接微博”的评论设置功能，无需另外安装 灯鹭社会化评论 插件，谢谢您的支持！</strong></p>";
 			echo '</div>';
@@ -24,7 +24,7 @@ function denglu_comments_warning() {
 
 add_action('admin_menu', 'denglu_comments_add_page');
 function denglu_comments_add_page() {
-	if (version_compare(WP_CONNECT_VERSION, '2.0', '<')) {
+	if (substr(WP_CONNECT_VERSION, 0, 1) != 2) {
 		add_options_page('Denglu评论', 'Denglu评论', 'manage_options', 'denglu', 'denglu_comments_do_page');
 		global $wptm_basic, $wptm_comment;
 		if ($wptm_basic['appid'] && $wptm_basic['appkey'] && current_user_can('manage_options')) {

@@ -210,7 +210,7 @@ if (!function_exists('is_plugin_activate')) {
 function wp_connect_v1() {
 	if (is_plugin_activate('wp-connect/wp-connect.php')) {
 		$wptm_version = get_option('wptm_version');
-		if ($wptm_version && version_compare($wptm_version, '2.0', '<')) {
+		if ($wptm_version && substr($wptm_version, 0, 1) != 2) {
 			return true;
 		} 
 	} 
