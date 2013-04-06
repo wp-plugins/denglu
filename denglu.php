@@ -5,7 +5,7 @@ Author: 水脉烟香
 Author URI: http://www.smyx.net/
 Plugin URI: http://wordpress.org/extend/plugins/denglu/
 Description: 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
-Version: 1.7.1
+Version: 1.7.2
 */
 
 $wptm_basic = get_option('wptm_basic');
@@ -145,6 +145,9 @@ function denglu_comments_do_page() {
 	    <?php wp_nonce_field('comment-delete');?>
 		<span class="submit"><input type="submit" name="comment_delete" value="卸载插件" onclick="return confirm('您确定要卸载社会化评论？')" /></span>
 	  </form>
+	  <h3>自定义key时的回调地址</h3>
+	  <p><code><?php echo plugins_url('denglu') . '/dl_receiver.php';?></code></p>
+	  <p>提示：请确保“微博开放平台”的回调地址与<a href="http://open.denglu.cc/" target="_blank">灯鹭控制台</a>->回调地址里面的“填写转发地址”处填写的一致。</p>
 </div>
 <?php
 }
