@@ -258,8 +258,8 @@ if (!function_exists('wp_get_weibo_head')) {
 				$out = 'http://qzapp.qlogo.cn/qzapp/' . $weibo_uid . '/50';
 			} elseif ($mediaID == 17) {
 				$out = 'http://tx.tianyaui.com/logo/small/' . $weibo_uid;
-			} elseif (function_exists('get_avatar_url')) {
-				$out = get_avatar_url($weibo_uid, $mediaID);
+			} elseif (function_exists('dl_get_avatar_url')) {
+				$out = dl_get_avatar_url($weibo_uid, $mediaID);
 				if ($out) {
 					if ($mediaID == 4) {
 						$out = 'http://app.qlogo.cn/mbloghead/' . $out . '/50';
@@ -660,18 +660,18 @@ if (!function_exists('dcToLocal')) {
 				} 
 			} 
 		} else {
-			add_action('save_denglu_comment', 'save_user_head', 10, 4);
+			add_action('save_denglu_comment', 'dl_save_user_head', 10, 4);
 		    add_action('get_weibo_head', 'wp_get_weibo_head', 10, 4);
 		}
         // 获取用户头像
-		function get_avatar_url($account, $mediaID) {
+		function dl_get_avatar_url($account, $mediaID) {
 			global $wpdb;
 			return $wpdb -> get_var($wpdb -> prepare("SELECT avatar_url FROM wp_comments_avatar WHERE account = %s AND mediaID = %s", $account, $mediaID));
 		} 
 
-		function update_avatar_url($account, $mediaID, $avatar_url) {
+		function dl_update_avatar_url($account, $mediaID, $avatar_url) {
 			global $wpdb;
-			$cur = get_avatar_url($account, $mediaID);
+			$cur = dl_get_avatar_url($account, $mediaID);
 
 			if (!$cur) {
 				$wpdb -> insert('wp_comments_avatar', compact('account', 'mediaID', 'avatar_url'));
@@ -683,16 +683,16 @@ if (!function_exists('dcToLocal')) {
 			return true;
 		} 
 		// 保存用户头像
-		function save_user_head($commentID, $comment, $weibo_uid, $user_id) {
+		function dl_save_user_head($commentID, $comment, $weibo_uid, $user_id) {
 			if (!$user_id && $comment['head'] && in_array($comment['mediaID'], array(4, 5, 7, 8, 19, 28))) {
 				if ($weibo_uid) {
 					if ($comment['mediaID'] == 4) {
 						$path = explode('/', $comment['head']);
 					    $comment['head'] = $path[4];
 					} 
-					update_avatar_url($weibo_uid, $comment['mediaID'], $comment['head']);
+					dl_update_avatar_url($weibo_uid, $comment['mediaID'], $comment['head']);
 				} else { // baidu
-					update_avatar_url($comment['uid'], $comment['mediaID'], $comment['head']);
+					dl_update_avatar_url($comment['uid'], $comment['mediaID'], $comment['head']);
 				} 
 			} 
 		} 

@@ -3,8 +3,8 @@ Contributors: smyx
 Donate link: http://www.denglu.cc/source/denglu-comments.html
 Tags: wp-connect,wp connect,twitter,qq,sina,tencent,qzone,taobao,msn,tianya,netease,sohu,douban,baidu,renren,kaixin001,wbto,google,yahoo,connect,腾讯微博,新浪微博,搜狐微博,网易微博,人人网,开心网,豆瓣,天涯,百度,淘宝,微博通,登录,登陆,连接,同步,gtalk机器人,灯鹭,社会化评论,Denglu,Denglu评论,评论,disqus,pinglunla,uyan,youyan,duoshuo,widget,share
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 1.7.2
+Tested up to: 4.2.2
+Stable tag: 1.7.3
 
 灯鹭提供的社会化评论框，使用新浪微博、QQ、人人、360、Google、Twitter、Facebook等20家合作网站帐号登录并评论。
 
@@ -65,6 +65,10 @@ Stable tag: 1.7.2
 1. 登录社会化评论 后台界面
 
 == Changelog ==
+
+= 1.7.3 =
+
+修正部分bug
 
 = 1.6.9 =
 
